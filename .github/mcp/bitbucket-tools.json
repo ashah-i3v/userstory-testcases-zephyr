@@ -1,0 +1,42 @@
+{
+  "description": "Tool configuration for Bitbucket MCP Server. Controls which Bitbucket operations are available.",
+  "enabledTools": [
+    "listRepositories",
+    "getRepository",
+    "getRepositoryBranchingModel",
+    "getPullRequests",
+    "getPullRequest",
+    "getPullRequestDiff",
+    "getPullRequestDiffStat",
+    "getPullRequestPatch",
+    "getPullRequestComments",
+    "getPullRequestActivity",
+    "getPullRequestCommits",
+    "getPullRequestStatuses",
+    "getPullRequestTasks",
+    "createPullRequest",
+    "createDraftPullRequest",
+    "updatePullRequest",
+    "addPullRequestComment",
+    "approvePullRequest",
+    "mergePullRequest",
+    "createPullRequestTask",
+    "updatePullRequestTask",
+    "listPipelineRuns",
+    "getPipelineRun",
+    "getPipelineSteps",
+    "getPipelineStepLogs",
+    "runPipeline"
+  ],
+  "disabledTools": [
+    "declinePullRequest",
+    "deletePullRequestComment",
+    "stopPipeline"
+  ],
+  "notes": [
+    "All enabled tools respect Bitbucket user permissions",
+    "Destructive operations (decline, delete) are disabled by default",
+    "Pipeline operations require appropriate permissions",
+    "Set BITBUCKET_TOOLS_CONFIG environment variable to use this file"
+  ]
+}

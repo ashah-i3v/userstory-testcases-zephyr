@@ -1,0 +1,26 @@
+{
+  "name": "vtrs-elt",
+  "displayName": "ELT",
+  "description": "Electronic Lien and Title",
+  "version": "1.0.0",
+  "author": {
+    "name": "I3 Transportation",
+    "url": "https://i3transportation.com"
+  },
+  "homepage": "https://bitbucket.org/i3transportation/vtrs-elt",
+  "repository": "https://bitbucket.org/i3transportation/vtrs-elt",
+  "license": "Proprietary",
+  "keywords": [
+    "vtrs",
+    "elt",
+    "mcp",
+    "bitbucket",
+    "jira",
+    "zephyr",
+    "user-stories",
+    "test-cases"
+  ],
+  "skills": "../skills/",
+  "mcp": "./mcp-config.json",
+  "tools": "./bitbucket-tools.json"
+}
