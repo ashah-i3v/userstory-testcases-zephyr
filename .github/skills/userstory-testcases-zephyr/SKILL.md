@@ -3,28 +3,67 @@ name: userstory-testcases-zephyr
 description: "Use when a user story must be created or improved, reviewed before Jira update, converted into Zephyr test cases, and reviewed again before Zephyr publish. Supports Atlassian MCP Server (read-only), Zephyr MCP setup, gated approvals, BA/PO-friendly story output, and separate internal or external documentation generation."
 ---
 
-# User Story Improvement And Zephyr Test Management
+# 🚀 User Story & Zephyr Test Management
 
-## Overview
-Use this skill to create or improve user stories, prepare them for Jira, generate Zephyr test cases, and enforce approval gates before any external write occurs.
+Manage the complete lifecycle of user stories: from scratch creation through Jira, Zephyr test publication, and audience-specific user documentation — with approval gates at every stage.
 
-This workflow is designed for business-facing story output with traceable, testable requirements and controlled Jira/Zephyr updates.
+> **Built for:** BA/PO-ready user stories, review-gated Jira updates, Zephyr publication, and format-validated end-user documentation.
+>
+> `Mode 1` Create Story  ·  `Mode 2` Improve Story  ·  `Mode 3` Generate Tests  ·  `Mode 4` Generate Docs
+>
+> **Approval gates:** `APPROVED_FOR_JIRA_UPDATE`  ·  `APPROVED_FOR_ZEPHYR_PUBLISH`  ·  `CHANGES_REQUIRED: <comments>`
 
-## When To Use This Skill
-- Create a new user story from a feature request or business need.
-- Improve an existing Jira story before updating it.
-- Generate Zephyr test cases from an approved story and publish them after review.
-- Generate internal or external user documentation as a separate deliverable when requested.
+---
 
-## Trigger Phrases
+## ✨ What This Skill Does
 
-### 1. Create A New Story
+| Capability | Mode | What It Does |
+| --- | --- | --- |
+| 📖 Create Story | 1 | Build a 6-section story grounded in codebase context |
+| 🔍 Improve Story | 2 | Enrich an existing Jira story with validators, edge cases, errors |
+| 🧪 Generate & Publish Tests | 3 | **ALWAYS** creates test cases, requests approval, and publishes to Zephyr (no partial execution) |
+| 📚 Generate Documentation | 4 | Format-validated internal and external user guides saved to `docs/` |
+
+### 🧭 Quick Reference
+
+```text
+┌─────────┬───────────────────────────────┬───────────────────────────────┐
+│ Mode    │ Primary Outcome               │ Approval Gate                 │
+├─────────┼───────────────────────────────┼───────────────────────────────┤
+│ 1       │ New 6-section story           │ Jira gate before create/update│
+│ 2       │ Improved existing story       │ Jira gate before create/update│
+│ 3       │ Story + Zephyr-ready tests    │ Jira gate + Zephyr gate       │
+│ 4       │ Internal/external help docs   │ Format validation mandatory   │
+└─────────┴───────────────────────────────┴───────────────────────────────┘
+```
+
+---
+
+## 🎯 When To Use This Skill
+
+| Use Case | Choose This Mode |
+| --- | --- |
+| Feature request needs a brand-new story | `Mode 1` |
+| Existing Jira story is thin, vague, or missing validation detail | `Mode 2` |
+| Approved story must be turned into traceable test cases | `Mode 3` |
+| Feature needs internal or external user guidance in `docs/` | `Mode 4` |
+
+> **Rule of thumb:** stories are written for BA/PO consumption, tests are written for Zephyr import, and documentation is written for end users.
+
+---
+
+## 💬 Trigger Phrases
+
+### 1️⃣ Mode 1 — Create A New Story
+
 ```text
 Create a new user story for [feature description]
 ```
-The skill must confirm the Jira project key with the user before proceeding.
 
-### 2. Update An Existing Jira Story
+> ⚠️ The skill must confirm the Jira project key before proceeding.
+
+### 2️⃣ Mode 2 — Update An Existing Story
+
 ```text
 Improve user story ELT-123
 ```
@@ -32,15 +71,25 @@ Improve user story ELT-123
 Review and improve this user story: [paste story text]
 ```
 
-### 3. Generate Zephyr Tests And Publish
+### 3️⃣ Mode 3 — Generate Zephyr Tests And Publish (Always Complete)
+
+**Important:** All Mode 3 requests follow the complete workflow: generate → review → publish. Whether you say "generate" or "generate and publish", the full flow is always executed.
+
+```text
+Generate Zephyr test cases for CI-317
+```
 ```text
 Create test cases for ELT-123 and publish to Zephyr
 ```
 ```text
 Generate Zephyr test cases for user story: [paste story text]
 ```
+```text
+Generate tests for [feature name]
+```
 
-### 4. Generate Help Document
+### 4️⃣ Mode 4 — Generate Help Document
+
 ```text
 Generate help document for [feature name]
 ```
@@ -51,49 +100,90 @@ Create internal and external help documentation for [feature name]
 Generate help document for ELT-123
 ```
 
-## Approval Tokens
-Use the following tokens exactly as written:
+### ⚡ Fast Start Prompts
 
-| Gate | Token |
-| --- | --- |
-| Jira review approval | `APPROVED_FOR_JIRA_UPDATE` |
-| Zephyr publish approval | `APPROVED_FOR_ZEPHYR_PUBLISH` |
-| Revision request | `CHANGES_REQUIRED: <comments>` |
+```text
+Mode 1: Create a new user story for lienholder signup with ELT ID
+Mode 2: Improve user story MVS-2607 before Jira update
+Mode 3: Generate Zephyr test cases for CI-317
+        (Will always: generate tests → request approval → publish to Zephyr)
+Mode 4: Create internal and external help docs for lienholder signup with ELT ID
+```
 
-Approval tokens are case-sensitive.
+---
 
-## Operating Modes
+## 🔴 Approval Tokens
 
-| Mode | Purpose | Atlassian MCP Required | Zephyr MCP Required |
+Use the following tokens **exactly as written** — they are case-sensitive:
+
+| Gate | Token | When |
+| --- | --- | --- |
+| Jira review | `APPROVED_FOR_JIRA_UPDATE` | After story review (Modes 1/2/3) |
+| Zephyr publish | `APPROVED_FOR_ZEPHYR_PUBLISH` | After test review (Mode 3) |
+| Request revision | `CHANGES_REQUIRED: <comments>` | Any mode, any stage |
+
+> ❌ Never write to Jira or Zephyr before receiving the corresponding approval token.
+
+### Jira Write Enforcement (Modes 1/2/3)
+
+- Before receiving `APPROVED_FOR_JIRA_UPDATE`, only draft and review content is allowed.
+- The agent must not invoke Jira write tools before approval, including:
+  - `createJiraIssue`
+  - `editJiraIssue`
+  - `addCommentToJiraIssue`
+- If approval token is missing, return a pending Jira review state and stop.
+
+---
+
+## ⚙️ Operating Modes
+
+| Mode | Purpose | Atlassian MCP | Zephyr MCP |
 | --- | --- | --- | --- |
-| 1 | Create a new story | No | No |
-| 2 | Update an existing Jira story | Yes (read-only) | No |
-| 3 | Generate Zephyr tests and publish | Yes (read-only) | Yes |
-| 4 | Generate help document | Conditional, when Jira context is requested or required | No |
+| **1** — Create Story | Build new story from scratch | ❌ Not required | ❌ Not required |
+| **2** — Update Story | Improve existing Jira story | ✅ Read-only | ❌ Not required |
+| **3** — Zephyr Tests | Generate tests and publish | ✅ Read-only | ✅ Required |
+| **4** — Documentation | Generate user docs with validation | ⚡ Conditional | ❌ Not required |
 
-## Required Inputs
-- Operation mode: `1`, `2`, `3`, or `4`
-- Story source:
-  - Jira issue key, or
-  - Raw user story text
-- Optional context:
-  - Priority or risk
-  - Feature or module name
-  - Environment constraints
-  - Release or sprint context
-  - Zephyr Excel template file (`atm-exporter.xlsx`) used as the canonical import format for mode 3
-  - Documentation output request: `internal`, `external`, or `both`
-  - Documentation module name and feature name for output file naming
+## 🎛️ Mode Selection Card
 
-### Mode 4 Input Rules
-- Mode 4 may use a Jira issue key as the primary source when documentation should be generated from an existing story or requirement.
-- If a Jira issue key is provided for mode 4, Jira issue details must be used together with codebase context and any existing documentation.
-- If no Jira issue key is provided for mode 4, the feature name, module name, and enough functional context must be provided to generate documentation accurately.
+```text
+Need a brand-new story?             ──▶  Mode 1
+Need to strengthen an existing one? ──▶  Mode 2
+Need Zephyr import-ready test data? ──▶  Mode 3
+Need end-user documentation?        ──▶  Mode 4
+```
 
-## Codebase Context Requirements
-Before writing or improving any story, inspect the current codebase to gather domain context. Use that context to improve accuracy, but translate technical findings into business language.
+---
+
+## 📥 Required Inputs
+
+| Input | Required? | Notes |
+| --- | --- | --- |
+| Operation mode | ✅ Yes | `1`, `2`, `3`, or `4` |
+| Story source | ✅ Yes | Jira issue key **or** raw story text |
+| Priority / risk | Optional | Helps refine scope and test depth |
+| Feature / module name | Optional | Strongly recommended for Modes 3 and 4 |
+| Environment constraints | Optional | Include release, sprint, policy, or dependency limits |
+| Zephyr template file | Mode 3 | `atm-exporter.xlsx` is the canonical import format |
+| Documentation audience | Mode 4 | `internal`, `external`, or `both` |
+| Output naming inputs | Mode 4 | Module + feature name used for docs path generation |
+
+### Mode 4️⃣ Input Rules
+
+```text
+Jira key provided?      Yes ──▶ Use Jira + codebase + existing docs
+Jira key provided?      No  ──▶ Require feature name + module + enough functional detail
+Codebase missing?       Yes ──▶ Stop; do not generate documentation from Jira alone
+```
+
+---
+
+## 🔍 Codebase Context Requirements
+
+Before writing or improving any story, inspect the codebase for domain context. Translate findings into business language.
 
 ### Inspect These Sources
+
 | Source | Extract |
 | --- | --- |
 | API endpoints | Supported actions, inputs, and outcomes |
@@ -104,367 +194,594 @@ Before writing or improving any story, inspect the current codebase to gather do
 | Existing help or support documentation | Current user guidance that may need revision |
 
 ### Rules For Using Codebase Context
-- Use findings to improve Acceptance Criteria, Validation Rules, Edge Cases, and Error Handling Scenarios.
-- For documentation generation, codebase context is required. Do not generate help documentation from Jira text alone.
-- For mode 3, use the Zephyr Excel template structure exactly (sheet, columns, ordering, and expected field formats).
-- Prefer business concepts and user-observable outcomes over implementation details.
-- Do not expose class names, method names, framework names, routes, database terminology, or HTTP mechanics in the story.
-- If the codebase is incomplete or the feature is new, record assumptions explicitly.
-- Log each meaningful codebase inspection in the Execution Log.
 
-## Required Story Format
+| Rule | Expectation |
+| --- | --- |
+| Improve the story with evidence | Use findings to enrich ACs, validation, edge cases, and errors |
+| Docs require code grounding | ❌ Never generate documentation from Jira alone |
+| Zephyr requires strict template fidelity | Preserve sheet, columns, ordering, and field format exactly |
+| Translate to business language | Prefer user outcomes over technical implementation terms |
+| Hide implementation detail | ❌ No class names, method names, routes, DB terms, or HTTP mechanics |
+| Surface uncertainty explicitly | Record assumptions when codebase coverage is incomplete |
+| Keep an audit trail | Log each meaningful inspection in the Execution Log |
+
+> **Critical translation rule:** extract from code, then rewrite for business readers. Do not paste engineering language straight into the story.
+
+---
+
+## 📖 Required Story Format
+
 **See:** [Story Format Guide](references/story-format.md) for complete requirements.
 
-**Summary:**
-- Use 6 required sections: User Story, Description, Acceptance Criteria, Validation Rules, Edge Cases, Error Handling Scenarios
-- Write Given/When/Then acceptance criteria
-- Focus on business outcomes, not implementation details
-- Keep all criteria testable, specific, and measurable
+Generate all **6 required sections**:
 
-## Documentation Output Option
+| # | Section | Contains |
+| --- | --- | --- |
+| 1 | **User Story** | Role, goal, benefit |
+| 2 | **Description** | Context, scope, constraints, dependencies |
+| 3 | **Acceptance Criteria** | Given/When/Then format, 3+ criteria, testable |
+| 4 | **Validation Rules** | Field-level constraints grounded in codebase |
+| 5 | **Edge Cases** | Boundary conditions, special scenarios |
+| 6 | **Error Handling Scenarios** | User-facing error messages from code |
+
+---
+
+## 📚 Documentation Output — Mandatory Format
+
 **See:** [Documentation Format Guide](references/documentation-format.md) for complete requirements.
 
-**Summary:**
-- Documentation is a separate output from the story
-- Generate markdown files for internal, external, or both audiences
-- Use current codebase as primary source; Jira as secondary context
-- Output paths: `docs/internal/[module]/[feature].md` and `docs/external/[module]/[feature].md`
+When Mode 4 is invoked, ALL generated documentation **MUST** conform to the required format.
 
-## Zephyr Excel Import Format (Mode 3)
+### Required Document Structure
+
+```markdown
+# [Feature Name] — [Internal User Guide | External User Guide]
+
+## Overview
+## When to Use This
+## How to Access
+## [Section Name]
+### Field Guide
+| Field | Description | Required? | Notes |
+## Buttons
+| Button | What It Does |
+## Business Rules
+```
+
+### Audience Rules
+
+| Rule | Internal 🏛️ | External 👤 |
+| --- | --- | --- |
+| Admin-only and back-office fields | ✅ Include | ❌ Exclude |
+| Supervisor-level procedures | ✅ Include | ❌ Exclude |
+| Operational notes and exceptions | ✅ Include | ❌ Exclude |
+| Document Tracking section | ✅ Include | ❌ Exclude |
+| Hidden fields (`SetDisabledFieldsForExternal`) | ✅ Include | ❌ Exclude |
+| Carrier/external-user perspective | ✅ Include | ✅ Only this |
+
+### Mandatory Compliance Checks
+
+1. Heading must match: `# [Feature Name] — [Internal User Guide | External User Guide]`
+2. All required sections present in correct order
+3. Field Guide tables: exactly 4 columns (Field \| Description \| Required? \| Notes)
+4. Buttons tables: exactly 2 columns (Button \| What It Does)
+5. ❌ No embedded story content (User Story, Acceptance Criteria, Validation Rules, etc.)
+6. Output path matches audience and module naming scheme
+7. ❌ Do not generate if code context is insufficient or unavailable
+
+---
+
+## 🧪 Zephyr Excel Import Format (Mode 3)
+
 **See:** [Excel Template Format Guide](references/excel-template-format.md) for complete requirements.
 
-**Summary:**
-- Template file: `.github/skills/userstory-testcases-zephyr/templates/atm-exporter.xlsx`
-- Worksheet: `Sheet0` with header row 1
-- 18 required columns in exact order (Key, Name, Status, Precondition, Objective, etc.)
-- Generate positive, negative, boundary, and integration test cases
-- Map each test case to acceptance criteria for traceability
+| Property | Value |
+| --- | --- |
+| Template file | `.github/skills/userstory-testcases-zephyr/templates/atm-exporter.xlsx` |
+| Worksheet | `Sheet0` with header row 1 |
+| Required columns | 18 in exact order (Key, Name, Status, Precondition, Objective, …) |
+| Test categories | Positive, negative, boundary, integration/failure |
+| Traceability | Map every test case to one or more acceptance criteria |
 
-## External Dependencies
+
+---
+
+## 🔧 External Dependencies
 
 ### Atlassian MCP Server
-**See:** [Atlassian MCP Installation Guide](references/installation-atlassian.md) for complete setup instructions.
 
-**Summary:**
-- **Options:** HTTP (Rovo - Recommended) or stdio (Local)
-- **Required for:** Modes 2, 3, and 4 (when Jira context needed)
-- **Purpose:** Read-only access to Jira for inspecting stories and requirements
-- **HTTP Config:** `{"type": "http", "url": "https://mcp.atlassian.com/v1/mcp"}`
-- **stdio Config:** `{"type": "stdio", "command": "npx", "args": ["-y", "@atlassianlabs/mcp-server-atlassian"]}`
-- **Available Tools:** `getJiraIssue`, `searchJiraIssues`, `listJiraProjects`, `getJiraProject`
+**See:** [Atlassian MCP Installation Guide](references/installation-atlassian.md) for complete setup.
+
+| Property | Value |
+| --- | --- |
+| Options | HTTP (Rovo — Recommended) or stdio (Local) |
+| Required for | Modes 2, 3, and 4 (when Jira context needed) |
+| Purpose | Read-only access to Jira for inspecting stories |
+| HTTP Config | `{"type": "http", "url": "https://mcp.atlassian.com/v1/mcp"}` |
+| stdio Config | `{"type": "stdio", "command": "npx", "args": ["-y", "@atlassianlabs/mcp-server-atlassian"]}` |
+| Available Tools | `getJiraIssue`, `searchJiraIssues`, `listJiraProjects`, `getJiraProject` |
 
 ### Zephyr MCP Server
-**See:** [Zephyr MCP Installation Guide](references/installation-zephyr.md) for complete setup instructions.
 
-**Summary:**
-- **Server:** `jira-zephyr-mcp`
-- **Source:** https://github.com/leorosignoli/jira-zephyr-mcp
-- **Required for:** Mode 3 only
-- **Purpose:** Manage Zephyr test plans, cycles, and test publication workflows
-- **Prerequisites:** Node.js 18+, Jira API token, Zephyr API token
-- **Config Location:** `.vscode/mcp.json` with environment values for JIRA_BASE_URL, JIRA_USERNAME, JIRA_API_TOKEN, ZEPHYR_API_TOKEN
+**See:** [Zephyr MCP Installation Guide](references/installation-zephyr.md) for complete setup.
 
-## Preflight Policy
+| Property | Value |
+| --- | --- |
+| Server | `jira-zephyr-mcp` |
+| Source | https://github.com/leorosignoli/jira-zephyr-mcp |
+| Required for | Mode 3 only |
+| Purpose | Manage Zephyr test plans, cycles, and test publication |
+| Prerequisites | Node.js 18+, Jira API token, Zephyr API token |
+| Config Location | `.vscode/mcp.json` with `JIRA_BASE_URL`, `JIRA_USERNAME`, `JIRA_API_TOKEN`, `ZEPHYR_API_TOKEN` |
+
+---
+
+## 🛡️ Preflight Policy
+
 Run preflight before any story generation, Jira update, or Zephyr action.
 
-All preflight checks are active, not passive. Use terminal tool calls to run verification commands. Do not assume an MCP server is available, installed, or running without executing the commands. Before returning any failure code, attempt the corrective action described for that step. Only return a failure code after the corrective action has been tried and failed.
+> All preflight checks are **active**, not passive. Use terminal tool calls to verify. Do not assume any MCP server is available without executing the commands. Attempt the corrective action before returning a failure code.
+
+```text
+Preflight always runs first.
+
+Mode 1 ──▶ Input validation + Jira project confirmation
+Mode 2 ──▶ Atlassian MCP readiness
+Mode 3 ──▶ Atlassian MCP + Zephyr MCP + template validation
+Mode 4 ──▶ Audience inputs + code context + docs format validation
+```
 
 ### Base Checks
-1. Validate the selected mode.
-2. Validate the story identifier format when a Jira issue key is provided.
-3. For mode 1, ask the user to confirm the Jira project key and do not proceed until it is explicitly confirmed.
-4. For mode 2, complete the Atlassian MCP Server Readiness Sequence before any further action.
-5. For mode 3, complete the Atlassian MCP Server Readiness Sequence and then the Zephyr MCP Readiness Sequence before any further action.
-6. For mode 3, validate that `atm-exporter.xlsx` is available, readable, and mappable before generating any test cases.
-7. For mode 4, validate that the requested documentation audience and output naming inputs are present before any further action.
-8. For mode 4, require either a Jira issue key or sufficient feature context to identify the correct screens, sections, and business workflow.
-9. For mode 4, if a Jira issue key is provided, complete the Atlassian MCP Server Readiness Sequence before reading Jira context.
-10. For mode 4, confirm that relevant code context is available before generating documentation. If code context is insufficient, stop with `PRECONDITION_FAILED`.
-11. If required MCP servers (Atlassian or Zephyr) are not available to the current chat session, do not continue. Instruct the user to install and configure the required MCP servers following the installation steps, then ask them to start a new session and stop with `MCP_SESSION_RESTART_REQUIRED`.
 
-### Atlassian MCP Server Readiness Sequence
-Stop immediately if any step fails. Do not attempt automatic installation or configuration.
-
-#### Step 1: Verify MCP Server Installation
-- Check the MCP configuration file (`.vscode/mcp.json` or user MCP config) for an `atlassian` server entry.
-- Verify the server type is either:
-  - `"type": "http"` with URL `https://mcp.atlassian.com/v1/mcp` (Atlassian Rovo), OR
-  - `"type": "stdio"` with command `npx` and args containing `@atlassianlabs/mcp-server-atlassian`
-- Search for Atlassian MCP tools by attempting to use tool_search_tool_regex with pattern `atlassian.*jira|jira.*issue`.
-- If Atlassian MCP tools are not available in the current session or configuration is missing:
-  - Display the installation steps from the External Dependencies section.
-  - Instruct the user to:
-    1. Install the Atlassian MCP Server (HTTP Rovo or stdio from npm `@atlassianlabs/mcp-server-atlassian`)
-    2. Add to VS Code MCP configuration or Copilot CLI configuration
-    3. Configure OAuth sign-in for Jira (and optionally Confluence) with read-only scopes
-    4. For stdio servers: Restrict the server to read-only operations (deny create*/update*/delete*/add*/edit*)
-    5. Start a new chat session after installation
-  - Reference: https://github.com/atlassian/atlassian-mcp-server or https://mcp.atlassian.com
-  - Stop immediately with `ATLASSIAN_MCP_NOT_INSTALLED`.
-
-#### Step 2: Verify Read-Only Configuration
-- **For HTTP (Rovo) Configuration:**
-  - Read-only access is enforced through OAuth scopes at the Atlassian server level.
-  - No local verification is needed; proceed to Step 3.
-  
-- **For stdio Configuration:**
-  - Verify that only read operations are available.
-  - Check that write operations are not accessible:
-    - `createJiraIssue` - must be disabled
-    - `updateJiraIssue` - must be disabled
-    - `addJiraComment` - must be disabled
-    - `createConfluencePage` - must be disabled
-    - `updateConfluencePage` - must be disabled
-    - `deleteJiraIssue` - must be disabled
-  - If any write operations are available:
-    - Warn the user that the MCP server is not properly restricted.
-    - Instruct them to update the server configuration with tool restrictions:
-      - `"allow": ["get*", "fetch*", "search*", "list*"]`
-      - `"deny": ["create*", "update*", "delete*", "add*", "edit*"]`
-  - If any write operations are available:
-    - Warn the user that the MCP server is not properly restricted.
-    - Instruct them to update the server configuration with tool restrictions:
-      - `"allow": ["get*", "fetch*", "search*", "list*"]`
-      - `"deny": ["create*", "update*", "delete*", "add*", "edit*"]`
-    - Stop with `ATLASSIAN_MCP_NOT_READONLY`.
-
-#### Step 3: Verify Jira Site Access
-- Search for available Atlassian/Jira MCP tools using tool_search_tool_regex with pattern `atlassian|jira`.
-- If tools are found, attempt to use a read operation to verify connectivity.
-- If no Atlassian MCP tools are found or the read operation fails:
-  - Ask the user to verify their Atlassian OAuth authentication is active.
-  - Ask them to verify network connectivity to Jira.
-  - For HTTP servers: Verify the OAuth token hasn't expired and re-authenticate if needed.
-  - For stdio servers: Verify npm/npx can reach the package registry.
-  - Stop with `ATLASSIAN_MCP_CONNECTIVITY_FAILED`.
-
-#### Step 4: Confirm Readiness
-- Record `[Atlassian MCP Server] Ready (Read-Only)` in the Execution Log.
-- Proceed only after all previous steps pass.
-
-### Zephyr MCP Readiness Sequence
-Stop immediately if any step fails after its corrective action was attempted. Attempt the corrective action for each step before returning a failure code.
-
-#### Step 1: Verify Installation
-- Run `node --version` to confirm Node.js 18 or later is available.
-- Check whether a `jira-zephyr-mcp` directory exists locally with a `dist/` build output.
-- If the directory does not exist or `dist/` is missing:
-  - Run `git clone https://github.com/leorosignoli/jira-zephyr-mcp.git` into a local directory.
-  - Run `cd jira-zephyr-mcp && npm install` to install dependencies.
-  - Run `npm run build` to produce the build output.
-  - Verify that `dist/index.js` exists after the build.
-- If Node.js is not available, prompt the user to install Node.js 18 or later and stop with `MCP_INSTALL_FAILED`.
-- If the clone, install, or build fails, return `MCP_INSTALL_FAILED`.
-
-#### Step 2: Verify Configuration
-- Check each of the following locations in order for Zephyr MCP environment values:
-  - `.env` file in the `jira-zephyr-mcp` directory
-  - `.vscode/mcp.json` in the workspace
-  - VS Code user settings under the `github.copilot.mcp.servers` key
-- Confirm that `JIRA_BASE_URL`, `JIRA_USERNAME`, `JIRA_API_TOKEN`, and `ZEPHYR_API_TOKEN` are present and non-empty in at least one location.
-- Confirm that MCP config includes a `jira-zephyr-mcp` server entry.
-- If any required value is missing:
-  - List each missing value explicitly.
-  - Ask the user to supply the missing values. Do not proceed until they respond.
-  - Write the supplied values to `.env` in the `jira-zephyr-mcp` directory.
-  - Re-read the file to confirm the write succeeded.
-- If the `jira-zephyr-mcp` server entry is missing from MCP config:
-  - Create or update `.vscode/mcp.json` with a `jira-zephyr-mcp` entry using the example schema above.
-  - If workspace config cannot be written, create or update the user MCP config file instead.
-  - Preserve all existing `servers` entries and update only the `jira-zephyr-mcp` node.
-  - Re-read the config file to confirm the server entry exists.
-- If any required value remains missing after the prompt and write attempt, return `MCP_ENV_MISSING`.
-
-#### Step 3: Verify Runtime
-- Start or restart MCP servers after configuration changes.
-- Call a Zephyr MCP tool to check whether the server is responding.
-- If the call fails because the server is not running:
-  - Attempt to start it by running `node dist/index.js` from the `jira-zephyr-mcp` directory with the validated environment values loaded.
-  - Wait for the server to respond before continuing.
-- If startup fails or the server does not respond after the start attempt, return `MCP_START_FAILED`.
-- If the server is running but Zephyr MCP tools are still unavailable in the current session:
-  - Ask the user to start a new chat session so MCP tool availability can refresh.
-  - Stop immediately with `MCP_SESSION_RESTART_REQUIRED`.
-
-#### Step 4: Verify Connectivity
-- Execute a test call to confirm Zephyr connectivity and Jira API access, such as listing test cycles for a known project.
-- If authentication fails, ask the user to verify the `ZEPHYR_API_TOKEN` and `JIRA_API_TOKEN` values and retry once.
-- If the retry also fails, return `MCP_AUTH_FAILED`.
-
-#### Step 5: Confirm Readiness
-- Record `[Zephyr MCP] Ready` in the Execution Log.
-- Proceed only after all previous steps pass.
-
-### Preflight Failure Codes
-| Error Code | Scope | Meaning |
+| # | Check | Mode |
 | --- | --- | --- |
-| `ATLASSIAN_MCP_NOT_INSTALLED` | Atlassian MCP | Atlassian MCP Server is not installed or not available in current session |
-| `ATLASSIAN_MCP_NOT_READONLY` | Atlassian MCP | Atlassian MCP Server has write permissions enabled; must be restricted to read-only |
-| `ATLASSIAN_MCP_CONNECTIVITY_FAILED` | Atlassian MCP | Cannot connect to Jira via Atlassian MCP Server |
-| `MCP_INSTALL_FAILED` | Zephyr MCP | Zephyr MCP could not be cloned, installed, or built |
-| `MCP_ENV_MISSING` | Zephyr MCP | One or more required Zephyr MCP values are missing |
-| `MCP_START_FAILED` | Zephyr MCP | Zephyr MCP failed to start |
-| `MCP_AUTH_FAILED` | Zephyr MCP | Zephyr MCP authentication failed (Jira API or Zephyr API credentials invalid) |
-| `MCP_SESSION_RESTART_REQUIRED` | Session | MCP servers were installed or configured; user must start a new chat session |
-| `ZEPHYR_TEMPLATE_INVALID` | Zephyr Import | Template file is missing, unreadable, or incompatible with expected import format |
-| `PRECONDITION_FAILED` | General | Another preflight requirement failed |
+| 1 | Validate the selected mode | All |
+| 2 | Validate Jira issue key format when provided | All |
+| 3 | Confirm Jira project key with user (do not proceed until confirmed) | 1 |
+| 4 | Complete Atlassian MCP Server Readiness Sequence | 2 |
+| 5 | Complete Atlassian MCP + Zephyr MCP Readiness Sequences | 3 |
+| 6 | Validate `atm-exporter.xlsx` is available, readable, and mappable | 3 |
+| 7 | Validate documentation audience and output naming inputs are present | 4 |
+| 8 | Require Jira key or sufficient feature context | 4 |
+| 9 | Complete Atlassian MCP Readiness Sequence if Jira key provided | 4 |
+| 10 | Confirm code context is available; stop with `PRECONDITION_FAILED` if not | 4 |
+| 11 | Run Documentation Format Validation Sequence after generation | 4 |
+| 12 | If required MCP servers unavailable, stop with `MCP_SESSION_RESTART_REQUIRED` | 2/3/4 |
+| 13 | Verify Jira approval token before any Jira write operation | 1/2/3 |
 
-> Fail fast: do not continue to story work, Jira updates, or Zephyr actions until all required prerequisites are satisfied.
+### 🔵 Atlassian MCP Server Readiness Sequence
 
-## Workflow
+> Stop immediately if any step fails. Do not attempt automatic installation or configuration.
 
-### 1. Preflight
-- Run all required checks using terminal tool calls and MCP tool calls.
-- For each failed check, execute the corrective action defined in the readiness sequence before returning a failure code.
-- Log the outcome of every verification and corrective action in the Execution Log.
-- If MCP servers were started or restarted during preflight and tools are still unavailable in this session, instruct the user to start a new session and stop with `MCP_SESSION_RESTART_REQUIRED`.
-- Stop immediately if any prerequisite fails after the corrective action was attempted.
+```
+Step 1          Step 2           Step 3          Step 4
+[Verify         [Verify          [Verify Jira    [Confirm
+ Installation]→  Read-Only]    →  Site Access] →  Readiness]
+```
 
-### 2. Mode Routing
-- Mode 1: create a new story after the Jira project key is confirmed.
-- Mode 2: improve the story and update Jira after approval.
-- Mode 3: improve the story, generate test cases, and publish to Zephyr after approvals.
-- Mode 4: generate help documentation as a separate markdown deliverable for the requested audience, using code context and optional Jira context.
+**Step 1️⃣ — Verify MCP Server Installation**
 
-### 3. Read, Normalize, And Enrich From Codebase
-- Extract role, goal, benefit, constraints, dependencies, and non-functional expectations.
-- Inspect the codebase for relevant endpoints, DTOs, validators, domain entities, and error models.
-- Inspect any existing help, support, or release documentation relevant to the feature when available.
-- If a Jira issue key is provided, inspect the Jira issue for business context, scope, and terminology after Atlassian MCP Server readiness is confirmed.
-- Use codebase findings to improve validation rules, allowed values, edge cases, and error outcomes.
-- Use documentation findings to determine whether a separate documentation output should be generated and what guidance must change.
-- Inspect audience-specific visibility rules when present so internal and external documents reflect the actual user experience.
-- Translate technical findings into business language before including them in the story.
-- Log each relevant file or module inspected.
+Check `.vscode/mcp.json` or user MCP config for an `atlassian` server entry with either:
+- `"type": "http"` + URL `https://mcp.atlassian.com/v1/mcp` (Rovo), or
+- `"type": "stdio"` + command `npx` + args containing `@atlassianlabs/mcp-server-atlassian`
 
-### 4. Review Story Quality
-Evaluate the draft for:
-- clarity and completeness
-- testability
-- measurable acceptance criteria
-- edge and error path coverage
-- dependency visibility
+Search for Atlassian MCP tools via `tool_search` with pattern `atlassian.*jira|jira.*issue`.
 
-### 5. Propose Story Improvements
+If tools are unavailable, instruct the user to:
+1. Install Atlassian MCP (HTTP Rovo or `@atlassianlabs/mcp-server-atlassian`)
+2. Add to VS Code MCP configuration
+3. Configure OAuth for Jira with read-only scopes
+4. For stdio: restrict to `"allow": ["get*", "fetch*", "search*", "list*"]`
+5. Start a new chat session
+
+Stop with `ATLASSIAN_MCP_NOT_INSTALLED`.
+
+**Step 2️⃣ — Verify Read-Only Configuration**
+
+| Config Type | Action |
+| --- | --- |
+| HTTP (Rovo) | Read-only enforced by OAuth scopes — no check needed |
+| stdio | Verify write tools are disabled: `createJiraIssue`, `updateJiraIssue`, `addJiraComment`, etc. |
+
+If write operations are available on stdio, instruct user to add:
+```json
+"allow": ["get*", "fetch*", "search*", "list*"],
+"deny": ["create*", "update*", "delete*", "add*", "edit*"]
+```
+Stop with `ATLASSIAN_MCP_NOT_READONLY`.
+
+**Step 3️⃣ — Verify Jira Site Access**
+
+- Search for `atlassian|jira` MCP tools and attempt a read operation
+- If unavailable or failing: verify OAuth is active, re-authenticate if needed
+- Stop with `ATLASSIAN_MCP_CONNECTIVITY_FAILED`
+
+**Step 4️⃣ — Confirm Readiness**
+
+Record `[Atlassian MCP Server] Ready (Read-Only)` in the Execution Log.
+
+### 🟢 Zephyr MCP Readiness Sequence
+
+> Stop after attempting the corrective action for each step before returning a failure code.
+
+```
+Step 1       Step 2        Step 3       Step 4         Step 5
+[Verify   →  [Verify    →  [Verify   →  [Verify     →  [Confirm
+ Install]      Config]       Runtime]     Connectivity]   Readiness]
+```
+
+**Step 1️⃣ — Verify Installation**
+
+- Run `node --version` — must be Node.js 18+
+- Check that `jira-zephyr-mcp/dist/index.js` exists locally
+- If missing, run:
+  ```sh
+  git clone https://github.com/leorosignoli/jira-zephyr-mcp.git
+  cd jira-zephyr-mcp && npm install && npm run build
+  ```
+- Stop with `MCP_INSTALL_FAILED` if Node.js is absent or build fails
+
+**Step 2️⃣ — Verify Configuration**
+
+Check these locations in order for required values:
+- `.env` in `jira-zephyr-mcp/`
+- `.vscode/mcp.json`
+- VS Code user settings under `github.copilot.mcp.servers`
+
+Required values: `JIRA_BASE_URL`, `JIRA_USERNAME`, `JIRA_API_TOKEN`, `ZEPHYR_API_TOKEN`
+
+- If any are missing, ask the user and write supplied values to `.env`
+- If `jira-zephyr-mcp` entry is missing from MCP config, create it in `.vscode/mcp.json`
+- Stop with `MCP_ENV_MISSING` if values remain missing after prompt
+
+**Step 3️⃣ — Verify Runtime**
+
+- Restart MCP servers if configuration changed
+- Call a Zephyr MCP tool to check responsiveness
+- If not running, start with `node dist/index.js` from `jira-zephyr-mcp/`
+- If tools still unavailable in this session after start: stop with `MCP_SESSION_RESTART_REQUIRED`
+- Stop with `MCP_START_FAILED` if server fails to start
+
+**Step 4️⃣ — Verify Connectivity**
+
+- Call a test operation (e.g., list test cycles for a known project)
+- If authentication fails, ask user to verify tokens and retry once
+- Stop with `MCP_AUTH_FAILED` if retry also fails
+
+**Step 5️⃣ — Confirm Readiness**
+
+Record `[Zephyr MCP] Ready` in the Execution Log.
+
+### 📋 Documentation Format Validation Sequence (Mode 4 Only)
+
+> Run after generating documentation and before presenting output to the user.
+
+```
+Step 1       Step 2        Step 3       Step 4         Step 5
+[Verify   →  [Validate  →  [Validate →  [Validate   →  [Confirm
+ Paths]        Structure]    Audience]    Sources]        Compliance]
+```
+
+**Step 1️⃣ — Verify Output Path Structure**
+
+- Confirm `docs/` exists; create `docs/internal/` and/or `docs/external/` as needed
+- Confirm module subfolder exists or create it
+- Stop with `DOCS_PATH_CREATION_FAILED` if any path cannot be created
+
+**Step 2️⃣ — Validate Document Structure**
+
+For each generated file, verify:
+
+| Check | Requirement |
+| --- | --- |
+| Heading (line 1) | `# [Feature Name] — [Internal User Guide \| External User Guide]` |
+| Sections | Overview → When to Use → How to Access → [Feature Sections] → Business Rules |
+| Field Guide tables | Exactly 4 columns: Field \| Description \| Required? \| Notes |
+| Buttons tables | Exactly 2 columns: Button \| What It Does |
+| No embedded story | ❌ No User Story, Acceptance Criteria, Validation Rules sections |
+
+Stop with `DOCUMENTATION_FORMAT_VIOLATION` on any failure.
+
+**Step 3️⃣ — Validate Audience Rules**
+
+| Audience | Requirement |
+| --- | --- |
+| Internal | Admin-only fields, back-office procedures, operational notes included |
+| External | Hidden fields, admin functions, internal-only procedures excluded; carrier-focused language |
+
+Stop with `DOCUMENTATION_AUDIENCE_MISMATCH` on any violation.
+
+**Step 4️⃣ — Validate Content Sources**
+
+- Documentation must be grounded in actual codebase behavior
+- Jira context is secondary only (scope/terminology, not overriding code)
+- Stop with `DOCUMENTATION_SOURCE_INVALID` if Jira-only without code grounding
+
+**Step 5️⃣ — Confirm Format Compliance**
+
+Record `[Documentation Format] Validated — Ready for Output` in the Execution Log.
+
+### ⛔ Preflight Failure Codes
+
+| Code | Scope | Meaning |
+| --- | --- | --- |
+| `ATLASSIAN_MCP_NOT_INSTALLED` | 🔵 Atlassian MCP | Server not installed or unavailable in current session |
+| `ATLASSIAN_MCP_NOT_READONLY` | 🔵 Atlassian MCP | Write permissions enabled — must be restricted to read-only |
+| `ATLASSIAN_MCP_CONNECTIVITY_FAILED` | 🔵 Atlassian MCP | Cannot connect to Jira via MCP Server |
+| `MCP_INSTALL_FAILED` | 🟢 Zephyr MCP | Could not be cloned, installed, or built |
+| `MCP_ENV_MISSING` | 🟢 Zephyr MCP | One or more required environment values are missing |
+| `MCP_START_FAILED` | 🟢 Zephyr MCP | Server failed to start |
+| `MCP_AUTH_FAILED` | 🟢 Zephyr MCP | Authentication failed (Jira API or Zephyr API credentials invalid) |
+| `MCP_SESSION_RESTART_REQUIRED` | 🔄 Session | MCP installed/configured — user must start a new chat session |
+| `ZEPHYR_TEMPLATE_INVALID` | 🗂️ Zephyr Import | Template file missing, unreadable, or incompatible |
+| `DOCS_PATH_CREATION_FAILED` | 📚 Documentation | `docs/` folder or subfolder could not be created (permission denied) |
+| `DOCUMENTATION_FORMAT_VIOLATION` | 📚 Documentation | Document structure does not match required format |
+| `DOCUMENTATION_AUDIENCE_MISMATCH` | 📚 Documentation | Content does not match requested audience rules |
+| `DOCUMENTATION_SOURCE_INVALID` | 📚 Documentation | Documentation not grounded in codebase context |
+| `PRECONDITION_FAILED` | ⚠️ General | Another preflight requirement failed |
+
+> **Fail fast:** Do not continue to story work, Jira updates, or Zephyr actions until all required prerequisites are satisfied.
+
+---
+
+## 🔄 Workflow
+
+```
+┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐
+│ 1.         │──▶│ 2.         │──▶│ 3.         │──▶│ 4.         │──▶│ 5.         │
+│ Preflight  │   │ Mode       │   │ Codebase   │   │ Review     │   │ Propose    │
+│ Checks     │   │ Routing    │   │ Enrichment │   │ Quality    │   │ Story      │
+└────────────┘   └────────────┘   └────────────┘   └────────────┘   └────────────┘
+                                                                                 │
+                                                                                 ▼
+┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐   ┌────────────┐
+│ 10.        │◀──│ 9.         │◀──│ 8.         │◀──│ 7.         │◀──│ 6.         │
+│ Zephyr     │   │ Zephyr     │   │ Generate   │   │ Jira       │   │ Jira       │
+│ Publish    │   │ Review     │   │ Test Cases │   │ Update     │   │ Review     │
+└────────────┘   └────────────┘   └────────────┘   └────────────┘   └────────────┘
+```
+
+### 🧠 Workflow Intent
+
+```text
+Modes 1-2 focus on story quality.
+Mode 3 extends the story into publishable tests.
+Mode 4 branches into standalone user documentation.
+```
+
+### 1️⃣ Preflight
+
+- Run all required checks with terminal tool calls and MCP tool calls
+- For each failed check, execute the corrective action before returning a failure code
+- Log every verification and corrective action outcome
+- Stop with `MCP_SESSION_RESTART_REQUIRED` if MCP servers were started but tools are still unavailable
+
+### 2️⃣ Mode Routing
+
+| Mode | Action |
+| --- | --- |
+| 1 | Create new story after Jira project key is confirmed |
+| 2 | Improve story and update Jira after approval |
+| 3 | **COMPLETE FLOW:** Improve story → Jira approval → Generate test cases → Zephyr approval → Publish (all steps always executed) |
+| 4 | Generate help documentation using code context and optional Jira context |
+
+### 3️⃣ Read, Normalize, and Enrich From Codebase
+
+- Extract role, goal, benefit, constraints, dependencies, and non-functional expectations
+- Inspect endpoints, DTOs, validators, domain entities, and error models
+- Inspect any existing help or release documentation for the feature
+- If a Jira key is provided, read the issue after Atlassian MCP readiness is confirmed
+- Use codebase findings to improve validation rules, edge cases, and error outcomes
+- Translate technical findings into business language
+- Log each relevant file or module inspected
+
+### 4️⃣ Review Story Quality
+
+Evaluate the draft for: clarity, completeness, testability, measurable acceptance criteria, edge and error path coverage, dependency visibility
+
+### 5️⃣ Propose Story Improvements
+
 Provide:
-- an improved story using the required section format
-- refined Given/When/Then acceptance criteria
-- validation rules, edge cases, and error handling scenarios grounded in the codebase
-- assumptions and open questions
-- suggested Jira field updates
+- Improved story using the required 6-section format
+- Refined Given/When/Then acceptance criteria
+- Validation rules, edge cases, and error scenarios grounded in codebase
+- Assumptions and open questions
+- Suggested Jira field updates
 
-Do not write to Jira at this stage.
+For Mode 4, also provide: audience, source context, target output paths, and generated documentation content
 
-If documentation output was requested or clearly needed, also provide:
-- the documentation audience requested: internal, external, or both
-- the source context used: codebase only, or codebase plus Jira
-- the target output path for each markdown file
-- the generated documentation content using the Documentation Output Format
+❌ Do not write to Jira at this stage.
 
-### 6. Jira Review Gate
-- Present the improved story for review.
-- Accept only:
-  - `APPROVED_FOR_JIRA_UPDATE`
-  - `CHANGES_REQUIRED: <comments>`
-- If approval is not granted, stop with a pending Jira review state.
+### 6️⃣ Jira Review Gate
 
-### 7. Jira Update
-- Update Jira only after Jira approval is received.
-- Note: With Atlassian MCP Server configured as read-only, Jira updates must be performed manually.
-- Provide the complete update payload in a format that can be manually applied to the Jira issue.
-- Return a field-level summary of proposed changes.
+Present improved story for review. Accept only:
 
-### 8. Generate Test Cases
-For mode 3 only:
-- include positive, negative, boundary, and integration or failure scenarios as relevant
-- map each case back to one or more acceptance criteria
-- include the following fields in every case:
-  - `TestCaseId`
-  - `Title`
-  - `Preconditions`
-  - `Steps`
-  - `ExpectedResult`
-  - `Priority`
-  - `Type`
-  - `AcceptanceCriteriaReference`
-- produce an import-ready dataset aligned to `atm-exporter.xlsx` so output can be published to Zephyr without reformatting.
+```
+APPROVED_FOR_JIRA_UPDATE
+CHANGES_REQUIRED: <comments>
+```
 
-### 9. Zephyr Review Gate
-- Present the approved story summary, full test set, coverage map, and risks or gaps.
-- Accept only:
-  - `APPROVED_FOR_ZEPHYR_PUBLISH`
-  - `CHANGES_REQUIRED: <comments>`
-- If approval is not granted, stop with a pending Zephyr review state.
+If approval is not granted, stop with a pending Jira review state.
 
-### 10. Zephyr Publish
-- Publish only after Zephyr approval is received.
-- Preserve traceability between test cases and acceptance criteria.
-- Return a summary of created, updated, skipped, and failed items, including destination identifiers where available.
+### 7️⃣ Jira Create/Update
 
-## Required Output Order
-Every response must present sections in the following order:
+- Create or update only after Jira approval is received
+- Note: Atlassian MCP is read-only — Jira updates must be performed manually
+- Provide complete update payload and a field-level summary of proposed changes
 
-1. Preflight Check Result
-2. Operation Mode
-3. User Story
-4. Story Improvement Proposal
-5. Documentation Output
-6. Jira Review Request
-7. Jira Approval Status
-8. Jira Update Result
-9. Test Cases
-10. Coverage and Gaps
-11. Zephyr Review Request
-12. Zephyr Approval Status
-13. Zephyr Publish Result
-14. Execution Log
+### 8️⃣ Generate Test Cases
 
-Omit mode-specific sections only when the selected mode does not require them.
+**Mode 3 Requirement:** This step is ALWAYS executed for Mode 3. Regardless of whether the user says "generate" or "generate and publish", test case generation proceeds immediately and automatically continues to step 9️⃣ (Zephyr Review Gate).
 
-## Logging Standard
-Every response must include an Execution Log.
+For Mode 3 only, include: positive, negative, boundary, and integration/failure scenarios.
 
-### Required Logging Content
-- workflow stage
-- action performed
-- outcome
-- gate status changes
-- external write attempts to Jira or Zephyr
+Required fields per test case:
 
-### Log Format
-- `[<timestamp>] [<stage>] <action> -> <outcome>`
+| Field | Description |
+| --- | --- |
+| `TestCaseId` | Unique identifier |
+| `Title` | Descriptive name |
+| `Preconditions` | State required before the test |
+| `Steps` | Numbered action steps |
+| `ExpectedResult` | Observable outcome |
+| `Priority` | High / Medium / Low |
+| `Type` | Positive / Negative / Boundary / Integration |
+| `AcceptanceCriteriaReference` | Linked AC |
 
-### Example
-- `[2026-03-23T15:12:05Z] [Story Review] Parsed user story -> Completed`
-- `[2026-03-23T15:12:11Z] [Jira Gate] Approval token check -> Blocked (Pending Jira Review)`
+Output must be aligned to `atm-exporter.xlsx` — publishable without reformatting.
 
-## Quality Standards
-- Acceptance criteria must be specific, measurable, and verifiable.
-- Test steps and expected results must be executable without interpretation.
-- High-risk requirements must include negative-path coverage.
-- Open questions must be explicit and clearly marked.
-- Every story must include User Story, Description, Acceptance Criteria, Validation Rules, Edge Cases, and Error Handling Scenarios.
-- Acceptance Criteria must use Given/When/Then.
-- The story must contain only what the system should do, not how it is implemented.
-- Codebase-derived details must be grounded in actual code, not inferred without evidence.
-- The final story must be readable and useful to a BA or PO without technical translation.
-- Documentation output, when requested, must be produced as a separate markdown deliverable using the required audience-specific format.
-- Internal and external documentation must accurately reflect audience-specific field visibility and workflow differences.
-- Documentation output must be based on current code context and, when provided, Jira context; do not generate documentation from Jira alone.
-- Zephyr mode 3 output must always match the `atm-exporter.xlsx` schema and ordering exactly.
+**After generation is complete, proceed immediately to step 9️⃣ for review.**
 
-## Safety Rules
-- Do not invent business requirements.
-- Do not write to Jira before Jira approval.
-- Do not publish to Zephyr before Zephyr approval.
-- Do not proceed when prerequisites fail.
-- Do not bypass Atlassian MCP Server or Zephyr MCP readiness checks for modes that require them.
-- Do not attempt to use Atlassian MCP write operations; the server must be configured as read-only.
+### 9️⃣ Zephyr Review Gate
 
-## Failure Handling
-- If a Jira update fails, report the exact failure and retain the manual update payload.
-- If Zephyr publication fails, report case-level failures and retain the manual upload payload.
-- If the user responds with `CHANGES_REQUIRED`, revise the output and restart from the appropriate review gate.
+**Mode 3 Requirement:** For ALL Mode 3 requests, test cases MUST be reviewed and approved before publishing. This gate is mandatory and cannot be skipped.
 
-## Template Reference
+Present: approved story summary, full test set, coverage map, and risks or gaps. Accept only:
+
+```
+APPROVED_FOR_ZEPHYR_PUBLISH
+CHANGES_REQUIRED: <comments>
+```
+
+**Do not proceed to step 🔟 (Zephyr Publish) until `APPROVED_FOR_ZEPHYR_PUBLISH` token is provided.**
+
+### 🔟 Zephyr Publish
+
+**Mode 3 Requirement:** Publish execution is MANDATORY after Zephyr approval is granted. There is no "approval only" state in Mode 3.
+
+- Publish only after Zephyr approval (`APPROVED_FOR_ZEPHYR_PUBLISH`) is received
+- Preserve traceability between test cases and acceptance criteria
+- Return a summary of created, updated, skipped, and failed items with destination identifiers
+
+**All Mode 3 workflows conclude with published test cases in Zephyr. Generation without publishing is not a valid Mode 3 outcome.**
+
+---
+
+## 📋 Required Output Order
+
+Every response presents sections in this order — omit sections not applicable to the selected mode:
+
+| # | Section |
+| --- | --- |
+| 1 | Preflight Check Result |
+| 2 | Operation Mode |
+| 3 | User Story |
+| 4 | Story Improvement Proposal |
+| 5 | Documentation Output |
+| 6 | Jira Review Request |
+| 7 | Jira Approval Status |
+| 8 | Jira Update Result |
+| 9 | Test Cases |
+| 10 | Coverage and Gaps |
+| 11 | Zephyr Review Request |
+| 12 | Zephyr Approval Status |
+| 13 | Zephyr Publish Result |
+| 14 | Execution Log |
+
+---
+
+## 📊 Logging Standard
+
+Every response must include an **Execution Log** at the bottom.
+
+> **⚠️ Logging is mandatory.** Work must stay visible while preflight, review gates, Jira preparation, and Zephyr preparation are happening.
+
+### Log Prefixes
+
+```text
+ Prefix        Used For
+ ───────────   ─────────────────────────────────────────────
+ [Preflight]   Checks, readiness validation, corrective action
+ [Mode]        Selected mode and routing decisions
+ [Codebase]    Files, modules, validators, and docs inspected
+ [Story]       Story drafting and improvement steps
+ [Docs]        Documentation generation and validation steps
+ [Jira Gate]   Approval wait states and token checks
+ [Jira]        Jira update payload preparation or result
+ [Zephyr]      Test generation and publish results
+ [Execution]   General workflow checkpoints
+```
+
+**Format:** `[<timestamp>] [<stage>] <action> → <outcome>`
+
+```
+[2026-03-23T15:12:05Z] [Preflight]    Atlassian MCP readiness check → Ready (Read-Only)
+[2026-03-23T15:12:07Z] [Codebase]     Inspected app/customer.go     → Extracted 4 validation rules
+[2026-03-23T15:12:11Z] [Story Review] Parsed user story              → Completed
+[2026-03-23T15:12:18Z] [Jira Gate]    Approval token check           → Blocked (Pending Jira Review)
+```
+
+Log: workflow stage, action performed, outcome, gate status changes, and all Jira/Zephyr write attempts.
+
+---
+
+## ✅ Quality Standards
+
+| Standard | Requirement |
+| --- | --- |
+| Acceptance Criteria | Specific, measurable, verifiable, Given/When/Then format |
+| Test Steps | Executable without interpretation |
+| Negative Coverage | Required for high-risk requirements |
+| Open Questions | Explicit and clearly marked |
+| Story Sections | All 6 required: User Story, Description, AC, Validation Rules, Edge Cases, Errors |
+| Business Language | No class names, method names, routes, or HTTP mechanics |
+| Code Grounding | Codebase-derived details must be evidenced, not inferred |
+| BA/PO Readability | Final story must be useful without technical translation |
+
+### Documentation Quality Standards (Mode 4)
+
+| Standard | Requirement |
+| --- | --- |
+| Format Compliance | Must pass Documentation Format Validation Sequence before output |
+| Document Structure | Correct heading, required sections, exact column counts in tables |
+| No Embedded Story | ❌ Never embed User Story, AC, Validation Rules into documentation files |
+| Audience Adherence | Internal = all fields + admin; External = no hidden/admin fields |
+| Code Grounding | Primary source is codebase; Jira used only for scope/terminology |
+| Output Path | `docs/internal/[module]/[feature].md` or `docs/external/[module]/[feature].md` |
+| User Language | Written for non-technical users performing daily tasks |
+
+---
+
+## 🚫 Safety Rules
+
+- ❌ Do not invent business requirements
+- ❌ Do not write to Jira before `APPROVED_FOR_JIRA_UPDATE`
+- ❌ Do not publish to Zephyr before `APPROVED_FOR_ZEPHYR_PUBLISH`
+- ❌ Do not proceed when prerequisites fail
+- ❌ Do not bypass Atlassian MCP or Zephyr MCP readiness checks
+- ❌ Do not use Atlassian MCP write operations — server must be read-only
+- ❌ Do not invoke `createJiraIssue`, `editJiraIssue`, or `addCommentToJiraIssue` before Jira approval token is present in the current conversation
+
+### Mode 3 Safety Rules (Zephyr Workflow)
+
+- ❌ **Do NOT generate test cases and stop without requesting Zephyr review** — test case generation ALWAYS continues to approval gate
+- ❌ **Do NOT request approval only and skip publishing** — Mode 3 always completes with published test cases in Zephyr
+- ❌ **Do NOT allow partial execution of Mode 3** — whether user says "generate" or "generate and publish", the complete flow is mandatory: generate → review → publish
+- ❌ Do not stop at test case generation and wait for a separate "publish" command — Zephyr review gate comes immediately after generation
+- ❌ If user provides `APPROVED_FOR_ZEPHYR_PUBLISH`, proceed immediately to publish without further prompts
+- ❌ Do not ask "Would you like me to publish now?" — publishing is automatic after approval
+
+### Documentation Safety Rules (Mode 4)
+
+- ❌ Do not generate documentation without confirmed, sufficient code context
+- ❌ Do not generate documentation if Format Validation Sequence has not passed
+- ❌ Do not present documentation without first validating against required format
+- ❌ Do not embed story sections into documentation files
+- ❌ Do not generate external docs without confirming hidden/admin-only fields are excluded
+- ❌ Do not override observable code behavior with Jira text — call out discrepancies explicitly
+- ❌ Do not save documentation files until format validation is complete
+- ❌ Do not mix internal and external content in a single document
+
+---
+
+## ⚠️ Failure Handling
+
+- If a Jira update fails: report the exact failure and retain the manual update payload
+- If Zephyr publication fails: report case-level failures and retain the manual upload payload
+- If user responds with `CHANGES_REQUIRED`: revise output and restart from the appropriate review gate
+
+---
+
+## 📄 Template Reference
+
 Use the template file `templates/review-request.md`.

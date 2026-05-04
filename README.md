@@ -1,152 +1,470 @@
-# userstory-testcases-zephyr
+---
+name: userstory-testcases-zephyr
+description: "Create, improve, test, and publish user stories with Zephyr integration and audience-specific documentation generation."
+---
 
-## Purpose
-This skill supports an end-to-end workflow for:
-- creating or improving business-ready user stories
-- gating Jira changes behind explicit approval
-- generating Zephyr-ready test cases with traceability
-- gating Zephyr publication behind explicit approval
-- generating internal and/or external documentation when requested
+# 🚀 User Story & Zephyr Test Management — Complete Workflow
 
-It is designed to keep outputs BA/PO-friendly while grounding requirements in verified codebase behavior.
+Manage the complete lifecycle of user stories from creation through Zephyr test publication. Generate business-focused stories, create testable requirements, produce audience-specific user documentation with format validation, and enforce approval gates at every stage.
 
-## What This Skill Covers
-- Story creation and story refinement
-- Jira context inspection through Atlassian MCP (read-only)
-- Zephyr test generation and publish workflow
-- Documentation generation as a separate deliverable
-- Mandatory preflight checks and failure codes
-- Structured execution logging
+---
 
-## Operation Modes
-- Mode 1: Create a new story
-  - Jira project key confirmation is required before proceeding.
-- Mode 2: Improve an existing Jira story
-  - Atlassian MCP readiness is required.
-- Mode 3: Generate test cases and publish to Zephyr
-  - Atlassian MCP and Zephyr MCP readiness are required.
-  - The Excel template format must be valid before test generation.
-- Mode 4: Generate help documentation
-  - Requires sufficient feature context or a Jira issue key.
-  - When Jira context is used, Atlassian MCP readiness is required.
+## ✨ What This Skill Does
 
-## Approval Gates (Exact Tokens)
-Use these tokens exactly as written:
-- APPROVED_FOR_JIRA_UPDATE
-- APPROVED_FOR_ZEPHYR_PUBLISH
-- CHANGES_REQUIRED: <comments>
+Create engaging, testable user stories grounded in codebase context. Automatically generate Zephyr test cases with traceability. Produce separate, format-validated user documentation for internal (admin) and external (carrier) audiences.
 
-Tokens are case-sensitive.
+| Capability | What It Does |
+| --- | --- |
+| 📖 Story Creation | Build 6-section stories with Given/When/Then acceptance criteria |
+| 🔍 Story Improvement | Enrich existing Jira stories with codebase context and validations |
+| 🧪 Test Generation | Create positive, negative, boundary, and integration test cases |
+| 📤 Test Publishing | Publish directly to Zephyr Scale Cloud after approval |
+| 📚 Documentation | Generate format-validated user docs (internal + external) |
 
-## Required Inputs
-- Operation mode: 1, 2, 3, or 4
-- Story source:
-  - Jira issue key, or
-  - raw user story text
-- Optional context:
-  - priority/risk
-  - module/feature name
-  - environment constraints
-  - sprint/release context
-  - documentation audience: internal, external, or both
+---
 
-Mode 3 additionally requires the canonical Zephyr import template:
-- .github/skills/userstory-testcases-zephyr/templates/atm-exporter.xlsx
+## 🎯 Quick Start — Four Ways to Use
 
-## Quick Start
-Use one of the following prompts as-is, then provide any requested missing context.
+Choose the mode that fits your task:
 
-### Mode 1: Create A New Story
-```text
+### Mode 1️⃣  — Create a New Story
+
+**When:** You have a feature request and need a business-ready story
+
+```
 Create a new user story for [feature description]
 ```
 
-### Mode 2: Improve An Existing Jira Story
-```text
+**What happens:**
+1. You confirm the Jira project key
+2. Skill inspects codebase for context
+3. Story generated with all 6 sections
+4. You review and approve
+5. Jira issue created automatically
+
+**Output:** Jira issue with complete story
+
+---
+
+### Mode 2️⃣  — Update an Existing Story
+
+**When:** You want to improve a Jira story with codebase insights
+
+```
 Improve user story ELT-123
 ```
-```text
-Review and improve this user story: [paste story text]
-```
 
-### Mode 3: Generate Zephyr Tests And Publish
-```text
+**What happens:**
+1. Atlassian MCP fetches the story from Jira
+2. Codebase is inspected for domain context
+3. Story is enriched: better criteria, validation rules, edge cases
+4. You review improvements
+5. Jira issue updated automatically
+
+**Output:** Enhanced Jira issue with improved content
+
+---
+
+### Mode 3️⃣  — Generate & Publish Zephyr Tests
+
+**When:** You have an approved story and need test cases for execution
+
+```
 Create test cases for ELT-123 and publish to Zephyr
 ```
-```text
-Generate Zephyr test cases for user story: [paste story text]
+
+**What happens:**
+```
+┌─────────────────────────────────────────────────────────┐
+│ 1. Story → Improved & Approved                         │
+│ 2. Test Cases Generated (positive/negative/boundary)   │
+│ 3. Mapped to Acceptance Criteria for traceability      │
+│ 4. You review test set                                 │
+│ 5. Published to Zephyr Scale Cloud                     │
+│                                                         │
+│ Result: Ready-to-execute test cases linked to story   │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### Mode 4: Generate Help Documentation
-```text
-Generate help document for [feature name]
+**Requires:** Atlassian MCP + Zephyr MCP
+
+---
+
+### Mode 4️⃣  — Generate User Documentation
+
+**When:** You need help documentation (internal admin or external carrier guides)
+
 ```
-```text
-Create internal and external help documentation for [feature name]
-```
-```text
 Generate help document for ELT-123
 ```
+or
+```
+Generate internal and external help documentation for [feature name]
+```
 
-## Workflow Summary
-1. Preflight checks
-2. Mode routing
-3. Read/normalize/enrich from codebase (and Jira when applicable)
-4. Story quality review
-5. Story improvement proposal
-6. Jira review gate
-7. Jira update step (manual payload if MCP is read-only)
-8. Test case generation (mode 3)
-9. Zephyr review gate (mode 3)
-10. Zephyr publish (mode 3)
+**What happens:**
+```
+┌──────────────────────────────────────────────────────────┐
+│ Step 1: Code Context Validation                         │
+│ ✅ Codebase accessible and sufficient                   │
+│                                                          │
+│ Step 2: Domain Inspection                               │
+│ • Endpoints, DTOs, validators, error messages           │
+│ • Business rules from code analysis                     │
+│                                                          │
+│ Step 3: Generate Documentation                          │
+│ • Internal: admin fields, back-office procedures        │
+│ • External: carrier perspective, hidden fields excluded │
+│                                                          │
+│ Step 4: Format Validation (NEW!)                        │
+│ ✅ Heading ✅ Sections ✅ Tables ✅ Audience Rules     │
+│                                                          │
+│ Step 5: Save to docs/ Folder                            │
+│ docs/internal/[module]/[feature].md                     │
+│ docs/external/[module]/[feature].md                     │
+└──────────────────────────────────────────────────────────┘
+```
 
-## Required Output Order
-The skill output must preserve this section order:
-1. Preflight Check Result
-2. Operation Mode
-3. User Story
-4. Story Improvement Proposal
-5. Documentation Output
-6. Jira Review Request
-7. Jira Approval Status
-8. Jira Update Result
-9. Test Cases
-10. Coverage and Gaps
-11. Zephyr Review Request
-12. Zephyr Approval Status
-13. Zephyr Publish Result
-14. Execution Log
+**Output:** Format-validated markdown files in `docs/` folder
 
-Mode-specific sections may be omitted only when not applicable.
+---
 
-## Execution Log Standard
-Each response must include an execution log entry format:
-- [timestamp] [stage] action -> outcome
+## 🎯 Mode Selection Decision Matrix
 
-Example:
-- [2026-03-23T15:12:05Z] [Story Review] Parsed user story -> Completed
+| Your Situation | Best Mode | Why | Output |
+| --- | --- | --- | --- |
+| You have a feature request | **Mode 1** | Create story from scratch | Jira issue |
+| You want to improve a Jira story | **Mode 2** | Enrich with codebase context | Updated Jira issue |
+| You need Zephyr test cases | **Mode 3** | Tests from story + publish | Zephyr Scale Cloud |
+| You need user help documentation | **Mode 4** | Generate audience-specific docs | Markdown files in docs/ |
+| You want one complete workflow | **Mode 1 + 2 + 3** | Create, improve, test, publish | Jira + Zephyr |
+| You want docs + tests | **Mode 3 + 4** | Tests + documentation | Zephyr + docs/ |
 
-## Safety and Quality Rules
-- Do not invent business requirements.
-- Do not write to Jira before Jira approval.
-- Do not publish to Zephyr before Zephyr approval.
-- Do not bypass MCP readiness for required modes.
-- Acceptance criteria must be testable and written in Given/When/Then form.
-- Cover positive, negative, boundary, and integration/failure scenarios where relevant.
-- Preserve traceability from test cases to acceptance criteria.
+---
 
-## Included References
-- Core behavior and policy: SKILL.md
-- Story structure: references/story-format.md
-- Documentation format: references/documentation-format.md
-- Zephyr Excel format: references/excel-template-format.md
-- Atlassian MCP setup: references/installation-atlassian.md
-- Zephyr MCP setup: references/installation-zephyr.md
-- Review template: templates/review-request.md
+## 📋 What You'll Need
 
-## Recommended Usage
-- Start with mode selection and source input.
-- Run preflight before any story/Jira/Zephyr action.
-- Use approval gates to control external write steps.
-- Keep documentation output separate from story output.
-- Always include execution logs for traceability.
+### For All Modes
+- ✅ Access to workspace codebase
+
+### For Mode 1 (Story Creation)
+- ✅ Jira project key (we'll ask you to confirm)
+
+### For Mode 2 (Story Update)
+- ✅ Atlassian MCP Server (read-only)
+- ✅ Existing Jira issue key
+
+### For Mode 3 (Zephyr Publishing)
+- ✅ Atlassian MCP Server (read-only)
+- ✅ Zephyr MCP Server
+- ✅ JIRA_API_TOKEN
+- ✅ ZEPHYR_API_TOKEN
+
+### For Mode 4 (Documentation)
+- ✅ Codebase context (required)
+- ✅ Atlassian MCP (optional, for Jira context)
+- ✅ Write permission to `docs/` folder
+
+---
+
+## 🎓 The 6-Section Story Format
+
+Every story includes these required sections:
+
+| Section | What It Contains | Example |
+| --- | --- | --- |
+| **User Story** | Role, goal, benefit | "As a lienholder, I want to provide my ELT ID so that my account can be verified..." |
+| **Description** | Context, scope, constraints, dependencies | Business context, data flow, external systems involved |
+| **Acceptance Criteria** | Given/When/Then format, testable | Given a Lienholder account / When registering / Then ELT ID is required |
+| **Validation Rules** | Field-level constraints from code | ELT ID max 20 chars, must be alphanumeric, immutable after creation |
+| **Edge Cases** | Boundary conditions, special scenarios | Duplicate ELT ID, special characters, Unicode handling |
+| **Error Handling** | User-facing error messages | "Invalid ELT ID format. Please enter..." |
+
+---
+
+## ✅ Approval Gates — Three Checkpoints
+
+Before any external write (Jira, Zephyr, docs/), you must approve:
+
+| Gate | Trigger | When | Action |
+| --- | --- | --- | --- |
+| 🔴 **Jira Review** | After story improvement/creation | Mode 1/2 | Review story → `APPROVED_FOR_JIRA_UPDATE` |
+| 🟡 **Zephyr Review** | After test case generation | Mode 3 | Review tests → `APPROVED_FOR_ZEPHYR_PUBLISH` |
+| 🟢 **Changes Needed** | Anytime | Any mode | Respond with `CHANGES_REQUIRED: <comments>` |
+
+> **Tokens are case-sensitive!** Copy-paste them exactly.
+
+---
+
+## 📚 Documentation Format (Mode 4)
+
+Generated documentation MUST follow the required format:
+
+### ✅ Mandatory Structure
+
+```markdown
+# [Feature Name] — [Internal User Guide | External User Guide]
+
+## Overview
+Plain-language description of what the feature does
+
+## When to Use This
+Business scenario that leads to this feature
+
+## How to Access
+Navigation path to reach this feature
+
+## [Feature Section]
+Brief description of what this section covers
+
+### Field Guide
+| Field | Description | Required? | Notes |
+| --- | --- | --- | --- |
+
+## Buttons
+| Button | What It Does |
+| --- | --- |
+
+## Business Rules
+- List of rules and validations enforced by the system
+```
+
+### ✅ Audience Rules
+
+| Internal Documentation | External Documentation |
+| --- | --- |
+| ✅ ALL fields (admin + user-visible) | ❌ Hidden/admin-only fields EXCLUDED |
+| ✅ Back-office procedures | ❌ Internal-only workflows |
+| ✅ Admin overrides & exceptions | ❌ Supervisor-level procedures |
+| ✅ Operational notes | ✅ Carrier/lienholder perspective |
+
+### ❌ Never Include
+
+- Embedded story sections (User Story, Acceptance Criteria, etc.)
+- Class names, method names, technical implementation details
+- Database terminology or HTTP mechanics
+- Jira text without code grounding
+
+---
+
+## 🌿 Approval Flow Diagram
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ START: Mode Selection                                        │
+└──────────────────────────────────────────────────────────────┘
+                              ⬇️
+                    ┌─────────┴─────────┐
+                    │                   │
+            Mode 1/2 Story?      Mode 3/4 Other?
+                    │                   │
+                    ⬇️                   ⬇️
+        ┌─────────────────────┐  ┌──────────────────┐
+        │ Create/Update Story │  │ Generate Tests   │
+        │ (Review)            │  │ or Docs          │
+        └──────────┬──────────┘  │ (Review)         │
+                   │             └────────┬─────────┘
+                   ⬇️                     ⬇️
+        ┌─────────────────────────────────────────────┐
+        │ 🔴 JIRA REVIEW GATE                         │
+        │ Respond: APPROVED_FOR_JIRA_UPDATE           │
+        │ or: CHANGES_REQUIRED: <comments>            │
+        └────────────┬────────────────────────────────┘
+                     ⬇️
+            ┌─────────────────────────────────┐
+            │ ✅ JIRA UPDATE (write operation) │
+            └─────────────────────────────────┘
+                            │
+                   ┌────────┴────────┐
+                   │                 │
+              Mode 1/2        Mode 3/4
+              (Stop)      (Continue)
+                   │            ⬇️
+                   │    ┌──────────────────┐
+                   │    │ Zephyr/Doc Gate  │
+                   │    │ (if applicable)  │
+                   │    └────────┬─────────┘
+                   │             ⬇️
+                   │    ┌──────────────────┐
+                   │    │ ✅ PUBLISH/SAVE  │
+                   │    └──────────────────┘
+                   ⬇️
+        ┌─────────────────────────────────┐
+        │ ✨ COMPLETE                     │
+        │ Story + Tests + Docs ready!     │
+        └─────────────────────────────────┘
+```
+
+---
+
+## 🚀 Example Workflows
+
+### Scenario 1: Create Story → Test → Publish
+
+```
+1. Create story: Create a new user story for ELT ID validation
+2. Confirm Jira project: MVS
+3. Review story → APPROVED_FOR_JIRA_UPDATE
+4. Jira issue created: MVS-2607
+5. Generate tests: Create test cases for MVS-2607 and publish
+6. Review tests → APPROVED_FOR_ZEPHYR_PUBLISH
+7. Tests published: MVS-T1391 through MVS-T1406
+✅ DONE: Story + 16 test cases ready
+```
+
+### Scenario 2: Just Documentation
+
+```
+1. Generate help document for MVS-2607
+2. Select audience: Internal (admin + back-office)
+3. Skill inspects codebase
+4. Validates format (heading, sections, tables, audience rules)
+5. Saves: docs/internal/customer/lienholder_signup_elt_id.md
+✅ DONE: Internal help document ready for team
+```
+
+### Scenario 3: Improve Story Without Publishing
+
+```
+1. Improve user story MVS-2607
+2. Atlassian MCP fetches story from Jira
+3. Codebase inspected for context
+4. Review improvements → APPROVED_FOR_JIRA_UPDATE
+5. Jira issue updated (no Zephyr publish)
+✅ DONE: Story enhanced, no tests generated
+```
+
+---
+
+## 🛠️ Preflight Checks
+
+The skill runs automatic readiness checks:
+
+```
+MODE 1 (Story Creation)
+  ✅ Jira project key confirmation
+
+MODE 2 (Story Update)
+  ✅ Atlassian MCP Server readiness
+  ✅ Jira connectivity test
+
+MODE 3 (Zephyr Publishing)
+  ✅ Atlassian MCP Server readiness
+  ✅ Zephyr MCP Server readiness
+  ✅ Excel template validation
+  ✅ API credentials test
+
+MODE 4 (Documentation)
+  ✅ Code context availability
+  ✅ Atlassian MCP (if Jira context requested)
+  ✅ Documentation Format Validation Sequence
+  ✅ docs/ folder structure creation
+```
+
+If a check fails, the skill attempts automatic correction before stopping.
+
+---
+
+## 📊 Quick Reference Card
+
+```
+┌───────────────────────────────────────────────────────────────┐
+│ USER STORY & ZEPHYR — QUICK REFERENCE                        │
+├───────────────────────────────────────────────────────────────┤
+│ COMMAND PATTERNS                                              │
+│                                                               │
+│ MODE 1: Create a new user story for [description]           │
+│ MODE 2: Improve user story [ELT-123]                        │
+│ MODE 3: Create test cases for [ELT-123] and publish         │
+│ MODE 4: Generate help document for [ELT-123]                │
+├───────────────────────────────────────────────────────────────┤
+│ APPROVAL TOKENS (Case-Sensitive!)                            │
+│                                                               │
+│ ✅ APPROVED_FOR_JIRA_UPDATE                                 │
+│ ✅ APPROVED_FOR_ZEPHYR_PUBLISH                              │
+│ ❌ CHANGES_REQUIRED: <your comments>                        │
+├───────────────────────────────────────────────────────────────┤
+│ STORY STRUCTURE (6 Sections)                                 │
+│                                                               │
+│ 1. User Story (role, goal, benefit)                         │
+│ 2. Description (context, scope)                             │
+│ 3. Acceptance Criteria (Given/When/Then)                    │
+│ 4. Validation Rules (field-level constraints)               │
+│ 5. Edge Cases (boundary conditions)                         │
+│ 6. Error Handling (user-facing messages)                    │
+├───────────────────────────────────────────────────────────────┤
+│ OUTPUT LOCATIONS                                              │
+│                                                               │
+│ Story: Jira issue (created or updated)                       │
+│ Tests: Zephyr Scale Cloud                                    │
+│ Docs: docs/internal/[module]/[feature].md                    │
+│       docs/external/[module]/[feature].md                    │
+├───────────────────────────────────────────────────────────────┤
+│ 🎯 PRO TIPS                                                  │
+│                                                               │
+│ • Use Mode 4 to generate docs AFTER tests are published     │
+│ • Format validation is MANDATORY for Mode 4                 │
+│ • Codebase is PRIMARY source; Jira is secondary             │
+│ • Always review before approving (no auto-publish)          │
+│ • Test coverage includes positive/negative/boundary cases   │
+└───────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 🎓 Learning Path
+
+### 1️⃣  First Time (20 minutes)
+
+- Create a simple story: `Create a new user story for [small feature]`
+- Choose Jira project when prompted
+- Review the generated story
+- Approve with `APPROVED_FOR_JIRA_UPDATE`
+- See your first Jira issue created
+
+### 2️⃣  Getting Comfortable (Next few uses)
+
+- Try Mode 2: Improve an existing Jira story
+- Generate test cases: `Create test cases for [your story]`
+- Experiment with different audience docs: internal vs external
+
+### 3️⃣  Advanced Usage
+
+- Run full workflow: Create → Improve → Test → Publish
+- Generate both internal and external documentation
+- Contribute custom validation patterns
+
+---
+
+## 📞 Support & References
+
+| Need | Resource |
+| --- | --- |
+| Story format details | [story-format.md](references/story-format.md) |
+| Documentation format | [documentation-format.md](references/documentation-format.md) |
+| Zephyr import schema | [excel-template-format.md](references/excel-template-format.md) |
+| Atlassian MCP setup | [installation-atlassian.md](references/installation-atlassian.md) |
+| Zephyr MCP setup | [installation-zephyr.md](references/installation-zephyr.md) |
+| Mode-specific prompts | [.github/prompts/](../../prompts/) |
+
+---
+
+## ✨ Ready to Start?
+
+Pick your first task and the corresponding mode:
+
+```
+🎯 I want to create a new story
+   → Create a new user story for [feature description]
+
+🎯 I want to improve a Jira story  
+   → Improve user story [ELT-123]
+
+🎯 I want to generate Zephyr tests
+   → Create test cases for [ELT-123] and publish
+
+🎯 I want to generate user documentation
+   → Generate help document for [ELT-123]
+```
+
+Happy building! 🚀
