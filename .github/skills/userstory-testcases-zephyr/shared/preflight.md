@@ -72,7 +72,7 @@ This skill embeds published engineering practices from *Software Engineering at 
 | "The story draft looks good — let's update Jira now" | Draft quality is not approval. Wait for `APPROVED_FOR_JIRA_UPDATE` token. No exceptions. |
 | "The user said 'yes' informally — that counts as approval" | Approval tokens are exact and case-sensitive. `APPROVED_FOR_JIRA_UPDATE` is the only valid Jira gate token. |
 | "I'll create the Jira issue first, then get approval" | Approval precedes action. Reversing the order defeats the gate. Stop and wait. |
-| "Atlassian MCP has write permissions — I should use them" | Read-only enforcement is a safety rule. Write operations must be manual. Do not bypass. |
+| "Atlassian MCP has write permissions — I should use them automatically" | Write operations require explicit user opt-in. In Mode 1, the user must select Option B after `APPROVED_FOR_JIRA_UPDATE`. Do not publish without that choice. |
 
 ### Zephyr Workflow Shortcuts (Mode 3)
 

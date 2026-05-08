@@ -5,6 +5,8 @@
 > **Prerequisites:** Jira project key must be confirmed before proceeding.
 >
 > **Approval Gate:** `APPROVED_FOR_JIRA_UPDATE` before creating Jira issue.
+>
+> **After approval**, the user chooses: receive the Jira create payload for manual entry, or have the skill publish directly via Atlassian MCP.
 
 ---
 
@@ -162,13 +164,29 @@ CHANGES_REQUIRED: <comments>
 
 **Exit Criteria:** Approval token received, or workflow stops in pending review state.
 
-### 6️⃣ Prepare Jira Payload
+### 6️⃣ Deliver Story to Jira
 
-- Note: Atlassian MCP is read-only — Jira creates must be performed manually
-- Provide complete create payload with all fields
-- Include field-level summary of content
+After receiving `APPROVED_FOR_JIRA_UPDATE`, present both options and wait for the user to choose:
 
-**Exit Criteria:** Jira payload prepared and presented to user.
+```
+Option A: Show me the Jira create payload (I will create it manually)
+Option B: Publish to Jira for me via MCP
+```
+
+**Option A — Payload Only:**
+- Produce a complete Jira create payload with all fields populated
+- Include a field-level summary explaining each value
+- User creates the issue manually in Jira
+
+**Option B — Publish via MCP:**
+- Confirm Atlassian MCP is available (run MCP readiness check from [shared/preflight.md](../shared/preflight.md))
+- Call `mcp_atlassian-mcp_createJiraIssue` with the approved payload
+- Report the created issue key and URL on success
+- On failure, fall back to Option A and present the payload
+
+❌ Do not proceed with Option B unless the user explicitly selects it.
+
+**Exit Criteria:** Payload delivered (Option A) or Jira issue created and key confirmed (Option B).
 
 ---
 
@@ -190,7 +208,7 @@ CHANGES_REQUIRED: <comments>
 - ❌ Do not invent business requirements
 - ❌ Do not proceed without confirmed Jira project key
 - ❌ Do not create Jira issue before `APPROVED_FOR_JIRA_UPDATE`
-- ❌ Do not use Atlassian MCP write operations — server must be read-only
+- ❌ Do not publish to Jira via MCP unless user explicitly selects Option B after approval
 - ❌ Do not expand scope beyond the requested feature
 - ❌ Do not skip codebase inspection, even for "simple" stories
 
@@ -206,8 +224,9 @@ Present sections in this order:
 4. **Assumptions and Open Questions**
 5. **Jira Review Request**
 6. **Jira Approval Status**
-7. **Jira Create Payload** (after approval)
-8. **Execution Log**
+7. **Delivery Option Prompt** — Option A (payload) or Option B (publish via MCP)
+8. **Jira Create Payload** (Option A) or **Jira Issue Key + URL** (Option B)
+9. **Execution Log**
 
 ---
 

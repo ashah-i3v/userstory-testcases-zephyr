@@ -38,9 +38,9 @@ This skill uses **progressive disclosure** to load only the relevant workflow in
 
 | Capability | Mode | What It Does | File |
 | --- | --- | --- | --- |
-| 📖 Create Story | 1 | Build a 6-section story grounded in codebase context | [mode1-create.md](modes/mode1-create.md) |
+| 📖 Create Story | 1 | Build a 6-section story grounded in codebase context; after approval deliver payload or publish via MCP | [mode1-create.md](modes/mode1-create.md) |
 | 🔍 Improve Story | 2 | Enrich an existing Jira story with validators, edge cases, errors | [mode2-improve.md](modes/mode2-improve.md) |
-| 🧪 Generate & Publish Tests | 3 | Convert approved story into Zephyr-ready test cases and publish (assumes story is complete) | [mode3-zephyr.md](modes/mode3-zephyr.md) |
+| 🧪 Generate & Publish Tests | 3 | Convert approved story into Zephyr-ready test cases (CSV for review + inline table), then publish via Zephyr MCP | [mode3-zephyr.md](modes/mode3-zephyr.md) |
 | 📚 Generate Documentation | 4 | Format-validated internal and external user guides saved to `docs/` | [mode4-docs.md](modes/mode4-docs.md) |
 
 ### 🧭 Quick Reference

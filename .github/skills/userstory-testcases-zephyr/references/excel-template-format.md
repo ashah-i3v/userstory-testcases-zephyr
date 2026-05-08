@@ -1,7 +1,9 @@
 # Zephyr Excel Import Format
 
 ## Overview
-Mode 3 test cases must be generated in the Zephyr Excel import format using `atm-exporter.xlsx` as the canonical template.
+Mode 3 test cases must be generated as a **CSV file** using the Zephyr column schema from `atm-exporter.xlsx` as the canonical reference.
+
+> **Why CSV:** The `create_file` tool produces text content and cannot create valid binary `.xlsx` files. A CSV with the same 18 columns opens directly in Excel or Google Sheets for review, and is compatible with manual Zephyr import if needed.
 
 ## Canonical Template Schema
 - **Template file:** `.github/skills/userstory-testcases-zephyr/templates/atm-exporter.xlsx`
