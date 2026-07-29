@@ -64,10 +64,11 @@ Run preflight before test generation:
 | # | Check | Notes |
 | --- | --- | --- |
 | 1 | Validate story source provided | Jira key **or** story text |
-| 2 | Complete Zephyr MCP Readiness Sequence | See [shared/preflight.md](../shared/preflight.md) |
-| 3 | Validate `atm-exporter.xlsx` is available | Must be readable and structure-mappable |
-| 4 | Confirm feature name for output file naming | Ask if not provided |
-| 5 | Complete Atlassian MCP Readiness Sequence (optional) | Only if Jira key provided for story fetch |
+| 2 | Verify Node.js 18+ installed | Run `node --version` |
+| 3 | Verify `ZEPHYR_API_TOKEN` env var set | Check `$env:ZEPHYR_API_TOKEN` |
+| 4 | Validate `atm-exporter.xlsx` is available | Must be readable and structure-mappable |
+| 5 | Confirm feature name for output file naming | Ask if not provided |
+| 6 | Complete Atlassian MCP Readiness Sequence (optional) | Only if Jira key provided for story fetch |
 
 **Reference:** See [shared/preflight.md](../shared/preflight.md) for MCP readiness sequences and anti-rationalization tables.
 
@@ -86,17 +87,17 @@ Run preflight before test generation:
 | Available Tools | `getJiraIssue`, `searchJiraIssues` |
 | **Note** | Not required if story text is provided directly |
 
-### Zephyr MCP Server
+### Zephyr Publishing via Direct Script
 
 **See:** [references/installation-zephyr.md](../references/installation-zephyr.md) for complete setup.
 
 | Property | Value |
 | --- | --- |
-| Server | `jira-zephyr-mcp` |
-| Source | https://github.com/leorosignoli/jira-zephyr-mcp |
+| Approach | Direct Zephyr Scale API v2 via Node.js scripts |
+| Why not MCP | Remote MCP servers cannot access private Jira instances |
 | Required for | Mode 3 (mandatory) |
-| Purpose | Manage Zephyr test plans, cycles, and test publication |
-| Prerequisites | Node.js 18+, Jira API token, Zephyr API token |
+| Purpose | Publish test cases with steps directly to Zephyr Scale |
+| Prerequisites | Node.js 18+, Zephyr API token |
 
 ---
 
@@ -116,18 +117,20 @@ Run preflight before test generation:
 
 ## 🔄 Workflow (Mode 3)
 
-```Parse → 3. Generate → 4. Review → 5. Publish
-   Checks        Story      Tests        Gate       Zephyr
+```
+1. Preflight → 2. Parse → 3. Codebase → 4. Generate → 5. Review → 6. Publish
+   Checks       Story      Enrichment    Tests        Gate       Zephyr
 ```
 
-> **Critical:** Mode 3 is **atomic and complete**. All five steps always execute. There is no "generate only" outcome.
+> **Critical:** Mode 3 is **atomic and complete**. All six steps always execute. There is no "generate only" outcome.
 
 ---
 
 ### 1️⃣ Preflight Checks
 
 - Validate story source (Jira key or text)
-- Run Zephyr MCP Readiness Sequence
+- Verify Node.js 18+ installed
+- Verify `ZEPHYR_API_TOKEN` environment variable is set
 - Validate `atm-exporter.xlsx` template availability
 - Confirm feature name for output file
 - Run Atlassian MCP Readiness Sequence (only if Jira key provided)
@@ -144,14 +147,69 @@ Run preflight before test generation:
 - Extract acceptance criteria for traceability mapping (if present)
 - Log story parsing results
 
-**Exit Criteria:** Story content acquired and ready for test generation.
+**Exit Criteria:** Story content acquired and ready for codebase enrichment.
 
 ---
 
-### 3
+### 3️⃣ Codebase Enrichment (Test-Focused)
+
+**Purpose:** Inspect codebase to enrich test cases with code-grounded validation, edge cases, and error scenarios.
+
+**What to Inspect:**
+
+| Source | Extract for Test Cases |
+| --- | --- |
+| Validators | Field-level constraints for **boundary tests** (min/max, regex, length limits) |
+| Error models and problem details | Actual error messages and codes for **error scenario tests** |
+| Domain enums and states | Valid/invalid values for **negative tests** |
+| API endpoints | Input validation rules for **positive and negative tests** |
+| Request/response DTOs | Required vs optional fields, data types for **edge case tests** |
+| Integration points | External dependencies, failure modes for **integration tests** |
+
+**Rules for Using Codebase Context:**
+
+| Rule | Expectation |
+| --- | --- |
+| Ground tests in code evidence | Use actual validators, not assumed constraints |
+| Extract real error messages | Copy exact error text from code for expected results |
+| Identify actual boundaries | Find min/max from validators, not from story |
+| Surface missing coverage | Note where code has validators but story lacks acceptance criteria |
+| Translate to test language | Convert technical constraints to user-facing test steps |
+| Keep audit trail | Log each file inspected and what was extracted |
+
+**Examples:**
+
+**Before enrichment (story-only):**
+```
+Test: Submit form with invalid email
+Expected: Error message displayed
+```
+
+**After enrichment (code-grounded):**
+```
+Test: Submit form with email "invalid@"
+Expected: "Email must be a valid email address" (from EmailValidator.cs line 45)
+Boundary: Max length 254 chars (from EmailAttribute maxLength)
+```
+
+**Exit Criteria:** 
+- Validators inspected and constraints extracted
+- Error models reviewed and messages documented
+- Domain constraints identified for negative tests
+- Integration points mapped for failure scenarios
+- Codebase enrichment logged
+
+---
+
 ### 4️⃣ Generate Test Cases
 
 **Mode 3 Requirement:** This step is ALWAYS executed. Regardless of whether the user says "generate" or "generate and publish", test case generation proceeds immediately and automatically continues to step 5️⃣ (Zephyr Review Gate).
+
+**Use Codebase Enrichment:** Apply findings from step 3️⃣ to generate code-grounded test cases:
+- Use actual validator constraints for boundary tests
+- Use actual error messages for expected results
+- Use domain enums for negative test values
+- Use integration points for failure scenario tests
 
 **MANDATORY CSV FILE GENERATION (for review):**
 
@@ -165,22 +223,22 @@ Run preflight before test generation:
 6. ❌ **DO NOT name the file `.xlsx`** — it would not be a valid Excel file
 7. ❌ **DO NOT deviate from the 18-column header order** — it must match `atm-exporter.xlsx` so the CSV can be manually imported if needed
 
-**Test Case Coverage Requirements:**4
+**Test Case Coverage Requirements:**
 
-Include: positive, negative, boundary, and integration/failure scenarios.
+Include: positive, negative, boundary, and integration/failure scenarios **grounded in codebase findings from step 3️⃣**.
 
 Required fields per test case (must match template exactly):
 
-| Field | Description |
-| --- | --- |
-| `TestCaseId` | Unique identifier |
-| `Title` | Descriptive name |
-| `Preconditions` | State required before the test |
-| `Steps` | Numbered action steps |
-| `ExpectedResult` | Observable outcome |
-| `Priority` | High / Medium / Low |
-| `Type` | Positive / Negative / Boundary / Integration |
-| `AcceptanceCriteriaReference` | Linked AC |
+| Field | Description | Code-Grounding |
+| --- | --- | --- |
+| `TestCaseId` | Unique identifier | N/A |
+| `Title` | Descriptive name | Use actual feature/field names from code |
+| `Preconditions` | State required before the test | Reference actual system states from domain enums |
+| `Steps` | Numbered action steps | Use actual field names and constraints from DTOs |
+| `ExpectedResult` | Observable outcome | **Use exact error messages from code** |
+| `Priority` | High / Medium / Low | Based on validator criticality (required fields = High) |
+| `Type` | Positive / Negative / Boundary / Integration | Boundary tests use actual min/max from validators |
+| `AcceptanceCriteriaReference` | Linked AC | Map to story AC + note code-grounded additions |
 
 **Format Compliance:**
 - CSV header row MUST contain all 18 columns in exact order from `atm-exporter.xlsx` template
@@ -200,17 +258,16 @@ Required fields per test case (must match template exactly):
 ---
 
 ### 5️⃣ Zephyr Review Gate
-4️⃣ for review.**
 
-**Exit Criteria:** 
-- Excel file created at output path
-- Template structure preserved exactly
-- Test cases cover positive, negative, boundary, and integration scenarios
-- Ready for review presentation with file path provided
+**Mandatory Step:** After test case CSV generation completes in step 4️⃣, present the generated test cases for Zephyr approval.
 
----
+**Present to User:**
+- Path to generated CSV file
+- Inline markdown summary table showing all test cases
+- Test coverage summary (positive, negative, boundary, integration)
+- Request explicit approval token: `APPROVED_FOR_ZEPHYR_PUBLISH`
 
-### 4not proceed to step 6️⃣ (Zephyr Publish) until `APPROVED_FOR_ZEPHYR_PUBLISH` token is provided.**
+**Important:** Do not proceed to step 6️⃣ (Zephyr Publish) until `APPROVED_FOR_ZEPHYR_PUBLISH` token is provided.
 
 **Exit Criteria:** `APPROVED_FOR_ZEPHYR_PUBLISH` token received, or workflow stops in pending review state.
 
@@ -220,15 +277,61 @@ Required fields per test case (must match template exactly):
 
 **Mode 3 Requirement:** Publish execution is MANDATORY after Zephyr approval is granted. There is no "approval only" state in Mode 3.
 
-- Publish only after Zephyr approval (`APPROVED_FOR_ZEPHYR_PUBLISH`) is received
-- Preserve traceability between test cases and acceptance criteria
-- Return a summary of cre5️⃣ (Zephyr Publish) until `APPROVED_FOR_ZEPHYR_PUBLISH` token is provided.**
+**Implementation:** Use direct Zephyr Scale API v2 via Node.js terminal commands.
 
-**Exit Criteria:** `APPROVED_FOR_ZEPHYR_PUBLISH` token received, or workflow stops in pending review state.
+**Process:**
+1. Read the generated CSV file from `.github/skills/userstory-testcases-zephyr/output/`
+2. Use `run_in_terminal` to execute Node.js script with Zephyr client
+3. Script parses CSV, creates test cases via API, and links to Jira issue
+4. Report results with created test case keys
+
+**Terminal Command Pattern:**
+
+```javascript
+const fs = require('fs');
+const { createZephyrClient } = require('./.github/skills/userstory-testcases-zephyr/lib/zephyr-client');
+const { parseCSV } = require('./.github/skills/userstory-testcases-zephyr/lib/csv-parser');
+
+// Read CSV
+const csvPath = '.github/skills/userstory-testcases-zephyr/output/test-cases-gl-post-continue-fix-20260728.csv';
+const csvContent = fs.readFileSync(csvPath, 'utf-8');
+const testCases = parseCSV(csvContent);
+
+// Create client (project key auto-extracted from issue key)
+const client = createZephyrClient(process.env.ZEPHYR_API_TOKEN);
+
+// Publish all tests
+const results = await client.createMultipleTestCases(testCases, 'MVS-3370');
+
+// Report results
+console.log(`\n✅ Published ${results.filter(r => r.success).length} test cases`);
+results.forEach(r => {
+  if (r.success) {
+    console.log(`  ✅ ${r.originalKey} → ${r.testCaseKey}`);
+  } else {
+    console.log(`  ❌ ${r.originalKey}: ${r.error}`);
+  }
+});
+```
+
+**Or use convenience script:**
+
+```powershell
+cd .github/skills/userstory-testcases-zephyr
+node scripts/publish-to-zephyr.js ./output/test-cases-gl-post-continue-fix-20260728.csv MVS-3370
+```
+
+**Required Environment Variable:**
+- `ZEPHYR_API_TOKEN` - Bearer token from Zephyr Scale
+
+**Exit Criteria:**
+- All test cases created in Zephyr with assigned keys
+- All test steps persisted (verified via Zephyr UI or API)
+- All test cases linked to the source Jira issue
+- Summary report presented with success/failure counts
+- Project key automatically extracted from issue key (e.g., "MVS-3370" → project "MVS")
 
 ---
-
-### 5
 
 ## ✅ Quality Standards (Mode 3)
 
@@ -236,6 +339,10 @@ Required fields per test case (must match template exactly):
 
 | Standard | Requirement |
 | --- | --- |
+| **Codebase Enrichment** | **MANDATORY** — Must inspect validators, error models, domain constraints before generating tests |
+| **Code-Grounded Boundaries** | Boundary tests must use actual min/max values from validators, not assumed values |
+| **Exact Error Messages** | Expected results must use exact error text from code, with source file reference |
+| **Domain-Validated Values** | Negative tests must use actual invalid values from domain enums/constraints |
 | File Generation | **MANDATORY** — Must create CSV file using `create_file` tool |
 | Template Fidelity | All 18 columns in exact order from `atm-exporter.xlsx`; compatible with manual import |
 | Output Path | `.github/skills/userstory-testcases-zephyr/output/test-cases-[feature-name]-[YYYYMMDD].csv` |
@@ -245,14 +352,19 @@ Required fields per test case (must match template exactly):
 | Format Compliance | Publishable to Zephyr without manual reformatting |
 | Test Steps | Executable without interpretation |
 | Negative Coverage | Required for high-risk requirements |
+| **Code Audit Trail** | Log each file inspected and constraints extracted during enrichment step |
 
 ---
 
 ## 🚫 Safety Rules (Mode 3)
 
+- ❌ **Do NOT skip codebase enrichment step** — validators, error models, and domain constraints MUST be inspected before generating tests
+- ❌ **Do NOT assume validation constraints** — use actual min/max, regex, length limits from code validators
+- ❌ **Do NOT paraphrase error messages** — copy exact error text from code for expected results
+- ❌ **Do NOT generate tests from story alone** — tests must be grounded in code findings from step 3️⃣
 - ❌ **Do NOT generate test cases and stop without requesting Zephyr review** — test case generation ALWAYS continues to approval gate
 - ❌ **Do NOT request approval only and skip publishing** — Mode 3 always completes with published test cases in Zephyr
-- ❌ **Do NOT allow partial execution of Mode 3** — whether user says "generate" or "generate and publish", the complete flow is mandatory: generate → review → publish
+- ❌ **Do NOT allow partial execution of Mode 3** — whether user says "generate" or "generate and publish", the complete flow is mandatory: preflight → parse → **enrich** → generate → review → publish
 - ❌ **Do NOT skip CSV file generation** — `create_file` must be called to produce the `.csv` output file
 - ❌ **Do NOT name the output file `.xlsx`** — `create_file` produces text; a `.xlsx` extension would not be a valid Excel file
 - ❌ **Do NOT generate test cases in markdown/text only** — both a CSV file and an inline markdown summary table are required
@@ -260,7 +372,7 @@ Required fields per test case (must match template exactly):
 - ❌ Do not stop at test case generation and wait for a separate "publish" command — Zephyr review gate comes immediately after generation
 - ❌ If user provides `APPROVED_FOR_ZEPHYR_PUBLISH`, proceed immediately to publish without further prompts
 - ❌ Do not ask "Would you like me to publish now?" — publishing is automatic after approval
-- ❌ Do not proceed without Zephyr MCP readiness confirmation
+- ❌ Do not proceed without verifying Node.js 18+ and `ZEPHYR_API_TOKEN`
 - ❌ Do not publish to Zephyr before `APPROVED_FOR_ZEPHYR_PUBLISH`
 
 ---
@@ -270,6 +382,14 @@ Required fields per test case (must match template exactly):
 Present sections in this order:
 
 1. **Preflight Check Result**
+2. **Story Parsing Summary** (if Jira key provided: issue key, title, acceptance criteria count)
+3. **Codebase Enrichment Log** (files inspected, constraints extracted, error messages found)
+4. **CSV File Path** (absolute path to generated `.csv` file)
+5. **Inline Test Case Summary Table** (markdown table showing all test cases for review)
+6. **Test Coverage Summary** (positive/negative/boundary/integration counts)
+7. **Code-Grounding Summary** (validator constraints used, error messages extracted, domain enums referenced)
+8. **Zephyr Review Gate Request** (`APPROVED_FOR_ZEPHYR_PUBLISH` token)
+9. **Publishing Results** (after approval: test case keys created, Jira link status)
 2. **Operation Mode** (Mode 3: Generate and Publish Zephyr Tests)
 3. **Story Summary** (from Jira or provided text)
 4. **Test Cases** — inline markdown summary table + CSV file path
@@ -285,6 +405,7 @@ Present sections in this order:
 
 - If no story source provided: stop with `PRECONDITION_FAILED`
 - If Atlassian MCP unavailable (when Jira key provided): stop with `ATLASSIAN_MCP_NOT_INSTALLED` or `MCP_SESSION_RESTART_REQUIRED`
-- If Zephyr MCP unavailable: stop with `MCP_INSTALL_FAILED`, `MCP_START_FAILED`, or `MCP_SESSION_RESTART_REQUIRED`
+- If Node.js not installed: stop with `NODEJS_NOT_INSTALLED`
+- If `ZEPHYR_API_TOKEN` not set: stop with `ZEPHYR_TOKEN_MISSING`
 - If template file invalid: stop with `ZEPHYR_TEMPLATE_INVALID`
 - If Zephyr publication fails: report case-level failures and retain the manual upload payload

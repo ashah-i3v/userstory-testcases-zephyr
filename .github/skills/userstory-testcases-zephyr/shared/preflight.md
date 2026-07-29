@@ -165,57 +165,37 @@ Record `[Atlassian MCP Server] Ready (Read-Only)` in the Execution Log.
 
 ---
 
-## 🟢 Zephyr MCP Readiness Sequence
+## 🟢 Zephyr Script Readiness Check (Mode 3 Only)
 
-> Stop after attempting the corrective action for each step before returning a failure code.
+> Quick verification that publishing scripts and credentials are ready.
 
 ```
-Step 1       Step 2        Step 3       Step 4         Step 5
-[Verify   →  [Verify    →  [Verify   →  [Verify     →  [Confirm
- Install]      Config]       Runtime]     Connectivity]   Readiness]
+Step 1       Step 2        Step 3
+[Verify   →  [Verify    →  [Confirm
+ Node.js]     Token]       Readiness]
 ```
 
-**Step 1️⃣ — Verify Installation**
+**Step 1️⃣ — Verify Node.js Installation**
 
 - Run `node --version` — must be Node.js 18+
-- Check that `jira-zephyr-mcp/dist/index.js` exists locally
-- If missing, run:
-  ```sh
-  git clone https://github.com/leorosignoli/jira-zephyr-mcp.git
-  cd jira-zephyr-mcp && npm install && npm run build
-  ```
-- Stop with `MCP_INSTALL_FAILED` if Node.js is absent or build fails
+- If not installed, direct user to https://nodejs.org/ and stop with `NODEJS_NOT_INSTALLED`
 
-**Step 2️⃣ — Verify Configuration**
+**Step 2️⃣ — Verify API Token**
 
-Check these locations in order for required values:
-- `.env` in `jira-zephyr-mcp/`
-- `.vscode/mcp.json`
-- VS Code user settings under `github.copilot.mcp.servers`
+- Check for `ZEPHYR_API_TOKEN` environment variable
+- Windows: `$env:ZEPHYR_API_TOKEN`
+- macOS/Linux: `echo $ZEPHYR_API_TOKEN`
+- If missing, ask user to:
+  1. Generate token in Zephyr Scale → Settings → API Access Tokens
+  2. Set environment variable
+  3. Restart terminal
+- Stop with `ZEPHYR_TOKEN_MISSING` if token cannot be obtained
 
-Required values: `JIRA_BASE_URL`, `JIRA_USERNAME`, `JIRA_API_TOKEN`, `ZEPHYR_API_TOKEN`
+**Step 3️⃣ — Confirm Readiness**
 
-- If any are missing, ask the user and write supplied values to `.env`
-- If `jira-zephyr-mcp` entry is missing from MCP config, create it in `.vscode/mcp.json`
-- Stop with `MCP_ENV_MISSING` if values remain missing after prompt
+- Record `[Zephyr Direct Script] Ready (Node.js 18+, Token Set)` in the Execution Log
 
-**Step 3️⃣ — Verify Runtime**
-
-- Restart MCP servers if configuration changed
-- Call a Zephyr MCP tool to check responsiveness
-- If not running, start with `node dist/index.js` from `jira-zephyr-mcp/`
-- If tools still unavailable in this session after start: stop with `MCP_SESSION_RESTART_REQUIRED`
-- Stop with `MCP_START_FAILED` if server fails to start
-
-**Step 4️⃣ — Verify Connectivity**
-
-- Call a test operation (e.g., list test cycles for a known project)
-- If authentication fails, ask user to verify tokens and retry once
-- Stop with `MCP_AUTH_FAILED` if retry also fails
-
-**Step 5️⃣ — Confirm Readiness**
-
-Record `[Zephyr MCP] Ready` in the Execution Log.
+**Why No MCP:** Remote MCP servers cannot access private Jira instances. Direct script approach runs locally with full network access.
 
 ---
 

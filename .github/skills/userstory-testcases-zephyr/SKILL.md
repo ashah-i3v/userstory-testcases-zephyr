@@ -1,6 +1,6 @@
 ---
 name: userstory-testcases-zephyr
-description: "Use when a user story must be created or improved, reviewed before Jira update, converted into Zephyr test cases, and reviewed again before Zephyr publish. Supports Atlassian MCP Server (read-only), Zephyr MCP setup, gated approvals, BA/PO-friendly story output, and separate internal or external documentation generation."
+description: "Use when a user story must be created or improved, reviewed before Jira update, converted into Zephyr test cases, and reviewed again before Zephyr publish. Supports Atlassian MCP Server (read-only), direct Zephyr Scale API publishing via Node.js scripts (for private Jira instances), gated approvals, BA/PO-friendly story output, and separate internal or external documentation generation."
 ---
 
 # 🚀 User Story & Zephyr Test Management Router
@@ -40,7 +40,7 @@ This skill uses **progressive disclosure** to load only the relevant workflow in
 | --- | --- | --- | --- |
 | 📖 Create Story | 1 | Build a 6-section story grounded in codebase context; after approval deliver payload or publish via MCP | [mode1-create.md](modes/mode1-create.md) |
 | 🔍 Improve Story | 2 | Enrich an existing Jira story with validators, edge cases, errors | [mode2-improve.md](modes/mode2-improve.md) |
-| 🧪 Generate & Publish Tests | 3 | Convert approved story into Zephyr-ready test cases (CSV for review + inline table), then publish via Zephyr MCP | [mode3-zephyr.md](modes/mode3-zephyr.md) |
+| 🧪 Generate & Publish Tests | 3 | Inspect codebase (validators, errors, constraints), convert story into code-grounded Zephyr test cases (CSV + inline table), then publish via Zephyr API | [mode3-zephyr.md](modes/mode3-zephyr.md) |
 | 📚 Generate Documentation | 4 | Format-validated internal and external user guides saved to `docs/` | [mode4-docs.md](modes/mode4-docs.md) |
 
 ### 🧭 Quick Reference
@@ -195,7 +195,7 @@ All modes reference these common files:
 | **Documentation Format Guide** | Internal/external docs format | [references/documentation-format.md](references/documentation-format.md) |
 | **Excel Template Format** | Zephyr import structure | [references/excel-template-format.md](references/excel-template-format.md) |
 | **Atlassian MCP Installation** | HTTP/stdio setup for Jira read-only | [references/installation-atlassian.md](references/installation-atlassian.md) |
-| **Zephyr MCP Installation** | jira-zephyr-mcp setup and config | [references/installation-zephyr.md](references/installation-zephyr.md) |
+| **Zephyr Script Installation** | Direct API client setup (Node.js) | [references/installation-zephyr.md](references/installation-zephyr.md) |
 
 ---
 
